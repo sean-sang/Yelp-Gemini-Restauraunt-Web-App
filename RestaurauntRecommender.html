@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Restaurant Recommender</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        #header {
+            padding: 20px;
+            background-color: #f8f8f8;
+            text-align: center;
+        }
+        #logo {
+            width: 100px;
+            height: auto;
+        }
+        #search-container {
+            padding: 20px;
+            background-color: #f8f8f8;
+            text-align: center;
+        }
+        #search-bar {
+            width: 300px;
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        #search-button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <img id="logo" src="logo.jpg" alt="Restaurant Recommender Logo">
+        <h1>Restaurant Recommender</h1>
+    </div>
+    <div id="search-container">
+        <input type="text" id="search-bar" placeholder="Search for restaurants...">
+        <button id="search-button">Search</button>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        // Yelp API key
+        const apiKey = 'mpUBLXDbRvr6QAxwIMOp3xssUgC76u61q43hL_YiCMeeqjJI1QZEXlbBUQdQe-WxGFXVQniQiLLdveIiIfLAWgEmsNXK4zpbpMCntX9-KtwV79uyW65Nq3VU6TUtZ3Yx';
+
+        // Initialize the map
+        let map;
+        let infoWindow;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 34.0522, lng: -118.2437 }, // Center map on Los Angeles, CA
+                zoom: 12
+            });
+
+            document.getElementById('search-button').addEventListener('click', () => {
+                const searchQuery = document.getElementById('search-bar').value;
+                searchYelp(searchQuery, map);
+            });
+        }
+
+        // Search Yelp API
+        function searchYelp(query, map) {
+            const url = `https://api.yelp.com/v3/businesses/search?term=${query}&location=Los Angeles, CA`;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data.businesses, map);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Display search results on the map
+        function displayResults(businesses, map) {
+            // Clear previous markers
+            if (map.markers) {
+                map.markers.forEach(marker => marker.setMap(null));
+            }
+            map.markers = [];
+            if (infoWindow) {
+                infoWindow.close();
+            }
+
+            businesses.forEach(business => {
+                const marker = new google.maps.Marker({
+                    position: {
+                        lat: business.coordinates.latitude,
+                        lng: business.coordinates.longitude
+                    },
+                    map: map,
+                    title: business.name
+                });
+
+                // Fetch business details for image
+                fetch(`https://api.yelp.com/v3/businesses/${business.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(details => {
+                    const infoContent = `
+                        <h3>${business.name}</h3>
+                        <p>${business.location.address1}</p>
+                        <p>${business.location.city}</p>
+                        <img src="${details.image_url}" alt="${business.name}" style="width:100px;">
+                    `;
+
+                    const markerInfoWindow = new google.maps.InfoWindow({
+                        content: infoContent
+                    });
+
+                    marker.addListener('click', () => {
+                        if (infoWindow) {
+                            infoWindow.close();
+                        }
+                        infoWindow = markerInfoWindow;
+                        infoWindow.open(map, marker);
+                    });
+
+                    map.markers.push(marker);
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        }
+
+        // Load the Google Maps script
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
