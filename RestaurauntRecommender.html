@@ -126,6 +126,23 @@
             padding: 10px 20px;
             font-size: 16px;
         }
+        #allergy-settings div {
+    display: flex;
+    justify-content: space-around; /* Space items evenly */
+    width: 100%;
+    margin-bottom: 10px;
+        }
+
+        #allergy-settings label {
+            width: 30%; /* Control the width of each checkbox label */
+            text-align: left; /* Align labels to the left */
+        }
+
+        #allergy-settings .spacer {
+            visibility: hidden; /* Hide the empty label but keep space */
+        }
+
+
 
     </style>
 </head>
@@ -157,13 +174,20 @@
                 <label><input type="checkbox" class="allergy-checkbox" id="peanut-free"> Peanut-free</label>
                 <label><input type="checkbox" class="allergy-checkbox" id="tree-nut-free"> Tree nut-free</label>
                 <label><input type="checkbox" class="allergy-checkbox" id="seafood-free"> Seafood-free</label>
-                <label><input type="checkbox" class="allergy-checkbox" id="dairy-free"> Dairy-free</label>
             </div>
             <div>
+                <label><input type="checkbox" class="allergy-checkbox" id="dairy-free"> Dairy-free</label>
                 <label><input type="checkbox" class="allergy-checkbox" id="gluten-free"> Gluten-free</label>
                 <label><input type="checkbox" class="allergy-checkbox" id="soy-free"> Soy-free</label>
             </div>
+            <div>
+                <label><input type="checkbox" class="allergy-checkbox" id="fish-free"> Fish-free</label>
+                <label class="spacer"></label> 
+                <label class="spacer"></label> 
+            </div>
         </div>
+        
+        
         
         <div class="box" id="preferences-settings">
             <h2>Preferences</h2>
@@ -185,7 +209,7 @@
     <div id="map"></div>
     
     <script>
-        const apiKey = 'YOUR_YELP_API_KEY'; // Replace with your actual Yelp API key
+        const apiKey = 'mpUBLXDbRvr6QAxwIMOp3xssUgC76u61q43hL_YiCMeeqjJI1QZEXlbBUQdQe-WxGFXVQniQiLLdveIiIfLAWgEmsNXK4zpbpMCntX9-KtwV79uyW65Nq3VU6TUtZ3Yx'; // Business Yelp API Key
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
@@ -265,7 +289,7 @@
 
          });
 
-        function getSelectedAllergies() {
+         function getSelectedAllergies() {
             const allergies = [];
             if (document.getElementById('peanut-free').checked) allergies.push('peanut-free restaurants');
             if (document.getElementById('tree-nut-free').checked) allergies.push('tree nut-free restaurants');
@@ -273,6 +297,7 @@
             if (document.getElementById('dairy-free').checked) allergies.push('dairy-free restaurants');
             if (document.getElementById('gluten-free').checked) allergies.push('gluten-free restaurants');
             if (document.getElementById('soy-free').checked) allergies.push('soy-free restaurants');
+            if (document.getElementById('fish-free').checked) allergies.push('fish-free restaurants'); 
             return allergies.join(', ');
         }
 
