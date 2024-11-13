@@ -141,12 +141,43 @@
         #allergy-settings .spacer {
             visibility: hidden; /* Hide the empty label but keep space */
         }
+        #restaurant-list {
+            width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        body.dark-mode #restaurant-list {
+            background-color: #333;
+            color: #f8f8f8;
+        }
+
+        .restaurant-item {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .restaurant-item:last-child {
+            border-bottom: none;
+        }
+
+        .show-on-map {
+            margin-top: 5px;
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+
 
 
 
     </style>
 </head>
 <body>
+    <!--  HTML Edits --> 
     <button id="dark-mode-toggle">Toggle Dark Mode</button>
 
     <div id="header">
@@ -156,17 +187,14 @@
     
     <div id="search-container">
         <input type="text" id="search-bar" placeholder="Search for restaurants...">
-        
-        <!-- Group ZIP Code and Use My Location button in a div for horizontal layout -->
         <div class="location-options">
             <input type="text" id="zip-code" placeholder="ZIP Code">
             <button id="location-button">Use My Location</button>
         </div>
-        
-        <!-- Place the Search button on its own row below the location options -->
         <button id="search-button">Search</button>
     </div>
     
+    <!-- Allergy and Food Preferences settings moved here -->
     <div class="container">
         <div class="box" id="allergy-settings">
             <h2>Allergies Settings</h2>
@@ -186,11 +214,9 @@
                 <label class="spacer"></label> 
             </div>
         </div>
-        
-        
-        
+    
         <div class="box" id="preferences-settings">
-            <h2>Preferences</h2>
+            <h2>Food Preferences</h2>
             <div>
                 <label><input type="checkbox" class="preference-checkbox" id="mexican"> Mexican</label>
                 <label><input type="checkbox" class="preference-checkbox" id="chinese"> Chinese</label>
@@ -206,7 +232,10 @@
         </div>
     </div>
     
+    <!-- Map and Restaurant List below the settings -->
     <div id="map"></div>
+    <div id="restaurant-list"></div>
+    
     
     <script>
         const apiKey = 'mpUBLXDbRvr6QAxwIMOp3xssUgC76u61q43hL_YiCMeeqjJI1QZEXlbBUQdQe-WxGFXVQniQiLLdveIiIfLAWgEmsNXK4zpbpMCntX9-KtwV79uyW65Nq3VU6TUtZ3Yx'; // Business Yelp API Key
@@ -334,39 +363,130 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // Display search results on the map
-        function displayResults(businesses, map) {
-            // Clear previous markers
-            if (map.markers) {
-                map.markers.forEach(marker => marker.setMap(null));
-            }
+       
+        
+    function displayResults(businesses, map) {
+        const restaurantList = document.getElementById('restaurant-list');
+        restaurantList.innerHTML = ''; // Clear previous results
+
+        if (!map.markers) {
             map.markers = [];
-            if (infoWindow) {
-                infoWindow.close();
-            }
-
-            businesses.forEach(business => {
-                const marker = new google.maps.Marker({
-
-                    position: {
-                        lat: business.coordinates.latitude,
-                        lng: business.coordinates.longitude
-                    },
-                    map: map,
-                    title: business.name
-                });
-
-                // Create a click event listener to show the InfoWindow
-                marker.addListener('click', () => {
-                    if (infoWindow) {
-                        infoWindow.close();
-                    }
-                    displayBusinessDetails(business, marker);
-                });
-
-                map.markers.push(marker);
-            });
         }
+
+        // Clear previous markers from the map
+        map.markers.forEach(marker => marker.setMap(null));
+        map.markers = []; // Reset markers array
+
+        // Loop through businesses to add markers and list items
+        businesses.forEach((business, index) => {
+            // Add restaurant item to list
+            const listItem = document.createElement('div');
+            listItem.className = 'restaurant-item';
+            listItem.setAttribute('data-index', index); // Set data-index for identification
+            listItem.innerHTML = `
+                <h3>${business.name}</h3>
+                <p>${business.location.address1}, ${business.location.city}</p>
+                <img src="${business.image_url}" alt="${business.name}" style="width:100px; height:auto; display:block; margin:10px 0;">
+                <p class="show-on-map" onclick="showOnMap(${index})">Show on Map</p>
+            `;
+            
+            restaurantList.appendChild(listItem);
+
+            // Create marker for each business
+            const marker = new google.maps.Marker({
+                position: {
+                    lat: business.coordinates.latitude,
+                    lng: business.coordinates.longitude
+                },
+                map: map,
+                title: business.name
+            });
+
+            // Info on the restauraunts after interaction with marker
+            const infoWindow = new google.maps.InfoWindow({
+            content: `
+                <div>
+                    <h3 style="color: black;">${business.name}</h3> 
+                    <img src="${business.image_url}" alt="${business.name}" style="width:100px; display:block; margin:10px 0;">
+                    <p style="color: black;">${business.location.address1}, ${business.location.city}</p> 
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(business.location.address1 + ', ' + business.location.city)}" target="_blank" style="display:block; text-align:center; margin-top:10px; color:blue;">Get Directions</a>
+                </div>
+            `
+});
+
+
+
+            // Open info window when the marker is clicked and change font color of corresponding item
+            marker.addListener('click', () => {
+                if (map.infoWindow) map.infoWindow.close(); // Close any open info window
+                infoWindow.open(map, marker);
+                map.infoWindow = infoWindow;
+
+                // Change font color for the clicked restaurant item
+                highlightListItem(index);
+            });
+
+            // Store marker in map.markers array
+            map.markers.push(marker);
+        });
+    }
+
+    // Function to center the map on a selected marker, open info window, and highlight the item
+    function showOnMap(index) {
+        const marker = map.markers[index];
+        map.setCenter(marker.getPosition());
+        google.maps.event.trigger(marker, 'click'); // Simulate click to open info window
+        highlightListItem(index);
+    }
+
+    // Function to highlight a list item based on the index
+    function highlightListItem(index) {
+        // Remove highlight from any previously highlighted item
+        document.querySelectorAll('.restaurant-item h3').forEach(item => {
+            item.style.color = ''; // Reset color
+        });
+
+        // Set the font color of the clicked item to black
+        const selectedItem = document.querySelector(`.restaurant-item[data-index="${index}"] h3`);
+        if (selectedItem) {
+            selectedItem.style.color = 'black';
+        }
+    }
+
+
+
+
+function showRestaurantInfo(business, map, marker = null) {
+    const url = `https://api.yelp.com/v3/businesses/${business.id}`;
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const address = `${data.location.address1}, ${data.location.city}, ${data.location.state}`;
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+
+        const infoContent = `
+            <h3 style="color: black;">${data.name}</h3>
+            <p style="color: black;">${address}</p>
+            <img src="${data.image_url}" alt="${data.name}" style="width:100px; display:block; margin:10px 0;">
+            <a href="${directionsUrl}" target="_blank" style="display:block; text-align:center; margin-top:10px; color:black;">Get Directions</a>
+        `;
+
+        if (marker) {
+            if (infoWindow) infoWindow.close();
+            infoWindow = new google.maps.InfoWindow({ content: infoContent });
+            infoWindow.open(map, marker);
+        }
+    })
+    .catch(error => console.error('Error fetching restaurant details:', error));
+}
+
 
 
         // Display business details using Yelp data
