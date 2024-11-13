@@ -157,13 +157,13 @@
     <div id="search-container">
         <input type="text" id="search-bar" placeholder="Search for restaurants...">
         
-        <!-- Group ZIP Code and Use My Location button in a div for horizontal layout -->
+ 
         <div class="location-options">
             <input type="text" id="zip-code" placeholder="ZIP Code">
             <button id="location-button">Use My Location</button>
         </div>
         
-        <!-- Place the Search button on its own row below the location options -->
+
         <button id="search-button">Search</button>
     </div>
     
@@ -334,74 +334,80 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // Display search results on the map
-        function displayResults(businesses, map) {
-            // Clear previous markers
-            if (map.markers) {
-                map.markers.forEach(marker => marker.setMap(null));
-            }
-            map.markers = [];
-            if (infoWindow) {
-                infoWindow.close();
-            }
+        let infoWindow = null; // Declare infoWindow globally
 
-            businesses.forEach(business => {
-                const marker = new google.maps.Marker({
-
-                    position: {
-                        lat: business.coordinates.latitude,
-                        lng: business.coordinates.longitude
-                    },
-                    map: map,
-                    title: business.name
-                });
-
-                // Create a click event listener to show the InfoWindow
-                marker.addListener('click', () => {
-                    if (infoWindow) {
-                        infoWindow.close();
-                    }
-                    displayBusinessDetails(business, marker);
-                });
-
-                map.markers.push(marker);
-            });
-        }
-
-
-        // Display business details using Yelp data
-        function displayBusinessDetails(business, marker) {
-        const url = `https://api.yelp.com/v3/businesses/${business.id}`;
-
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Construct Google Maps directions URL with city and state
-            const address = `${data.name}, ${data.location.address1}, ${data.location.city}, ${data.location.state}`;
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
-
-            const infoContent = `
-                <h3>${data.name}</h3>
-                <p>${data.location.address1}</p>
-                <p>${data.location.city}</p>
-                <img src="${data.image_url}" alt="${data.name}" style="width:100px; display: block; margin: 0 auto;"> 
-                <a href="${directionsUrl}" target="_blank" style="display: block; text-align: center; margin-top: 10px;">Get Directions</a>  
-            `;
-
-            infoWindow = new google.maps.InfoWindow({
-                content: infoContent
-            });
-
-            infoWindow.open(map, marker);
-        })
-        .catch(error => console.error('Error:', error));
+function displayResults(businesses, map) {
+    // Ensure that map.markers is initialized as an empty array if it's not already
+    if (!map.markers) {
+        map.markers = [];
     }
+
+    // Clear previous markers from the map
+    map.markers.forEach(marker => marker.setMap(null));
+    map.markers = []; // Reset the markers array
+
+    // Loop through businesses to add markers
+    businesses.forEach(business => {
+        const marker = new google.maps.Marker({
+            position: {
+                lat: business.coordinates.latitude,
+                lng: business.coordinates.longitude
+            },
+            map: map,
+            title: business.name
+        });
+
+        // Add click event to the marker
+        marker.addListener('click', () => {
+            if (infoWindow) {
+                infoWindow.close(); // Close any previously opened info windows
+            }
+            displayBusinessDetails(business, marker, map); // Show the business details
+        });
+
+        map.markers.push(marker); // Store the marker to map.markers array for later use
+    });
+}
+
+function displayBusinessDetails(business, marker, map) {
+    const url = `https://api.yelp.com/v3/businesses/${business.id}`;
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Construct the address and directions URL
+        const address = `${data.name}, ${data.location.address1}, ${data.location.city}, ${data.location.state}`;
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+
+        // Construct the content for the info window with black text
+        const infoContent = `
+            <h3 style="color: black;">${data.name}</h3>
+            <p style="color: black;">${data.location.address1}</p>
+            <p style="color: black;">${data.location.city}, ${data.location.state}</p>
+            <img src="${data.image_url}" alt="${data.name}" style="width:100px; display: block; margin: 0 auto;"> 
+            <a href="${directionsUrl}" target="_blank" style="display: block; text-align: center; margin-top: 10px; color: black;">Get Directions</a>  
+        `;
+
+        // Create and display the info window
+        infoWindow = new google.maps.InfoWindow({
+            content: infoContent
+        });
+
+        infoWindow.open(map, marker); // Open the info window at the marker position
+    })
+    .catch(error => {
+        console.error('Error fetching business details:', error);
+    });
+}
+
+
+
 
         // Load the Google Maps script
         const script = document.createElement('script');
