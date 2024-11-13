@@ -23,25 +23,39 @@
             background-color: #f8f8f8;
             text-align: center;
         }
-        #search-bar {
-            width: 300px;
+        #search-bar, #zip-code {
             padding: 10px;
-            margin-right: 10px;
             font-size: 16px;
-        }
-        #zip-code {
-            width: 100px;
-            padding: 10px;
-            margin-right: 10px;
-            font-size: 16px;
+            margin: 5px;
         }
         #search-button, #location-button {
             padding: 10px 20px;
             font-size: 16px;
         }
         #map {
-            height: 500px;
-            width: 100%;
+            height: 450px; /* Shrink the map slightly */
+            width: 90%; /* Center the map */
+            margin: auto; /* Center the map */
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+        .box {
+            width: 48%;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #allergy-settings {
+            text-align: left;
+        }
+        #allergy-settings label, #preferences-settings label {
+            display: inline-block;
+            width: 48%;
+            margin: 5px;
         }
     </style>
 </head>
@@ -55,6 +69,36 @@
         <input type="text" id="zip-code" placeholder="ZIP Code">
         <button id="search-button">Search</button>
         <button id="location-button">Use My Location</button>
+    </div>
+    <div class="container">
+        <div class="box" id="allergy-settings">
+            <h2>Allergies Settings</h2>
+            <div>
+                <label><input type="checkbox" class="allergy-checkbox" id="peanut-free"> Peanut-free</label>
+                <label><input type="checkbox" class="allergy-checkbox" id="tree-nut-free"> Tree nut-free</label>
+                <label><input type="checkbox" class="allergy-checkbox" id="seafood-free"> Seafood-free</label>
+                <label><input type="checkbox" class="allergy-checkbox" id="dairy-free"> Dairy-free</label>
+            </div>
+            <div>
+                <label><input type="checkbox" class="allergy-checkbox" id="gluten-free"> Gluten-free</label>
+                <label><input type="checkbox" class="allergy-checkbox" id="soy-free"> Soy-free</label>
+            </div>
+        </div>
+        <div class="box" id="preferences-settings">
+            <h2>Preferences</h2>
+            <div>
+                <label><input type="checkbox" class="preference-checkbox" id="mexican"> Mexican</label>
+                <label><input type="checkbox" class="preference-checkbox" id="chinese"> Chinese</label>
+                <label><input type="checkbox" class="preference-checkbox" id="italian"> Italian</label>
+                <label><input type="checkbox" class="preference-checkbox" id="indian"> Indian</label>
+            </div>
+            <div>
+                <label><input type="checkbox" class="preference-checkbox" id="japanese"> Japanese</label>
+                <label><input type="checkbox" class="preference-checkbox" id="mediterranean"> Mediterranean</label>
+                <label><input type="checkbox" class="preference-checkbox" id="thai"> Thai</label>
+                <label><input type="checkbox" class="preference-checkbox" id="french"> French</label>
+            </div>
+        </div>
     </div>
     <div id="map"></div>
 
@@ -72,9 +116,14 @@
             });
 
             document.getElementById('search-button').addEventListener('click', () => {
-                const searchQuery = document.getElementById('search-bar').value;
+                const searchQuery = document.getElementById('search-bar').value.trim();
                 const zipCode = document.getElementById('zip-code').value || 'Los Angeles, CA';
-                searchYelp(searchQuery, zipCode, map);
+                const allergies = getSelectedAllergies();
+                const preferences = getSelectedPreferences();
+                
+                // Use preferences as the search term if the search bar is empty
+                const term = searchQuery || preferences || 'restaurants';
+                searchYelp(term, zipCode, map, allergies, preferences);
             });
 
             document.getElementById('location-button').addEventListener('click', () => {
@@ -85,7 +134,12 @@
                             lng: position.coords.longitude
                         };
                         map.setCenter(coords);
-                        searchYelp('', `${coords.lat},${coords.lng}`, map);
+                        const allergies = getSelectedAllergies();
+                        const preferences = getSelectedPreferences();
+                        
+                        // Use preferences as the search term if no other term is provided
+                        const term = preferences || 'restaurants';
+                        searchYelp(term, `${coords.lat},${coords.lng}`, map, allergies, preferences);
                     }, () => {
                         alert('Geolocation failed or is not supported by your browser.');
                     });
@@ -95,9 +149,35 @@
             });
         }
 
+        function getSelectedAllergies() {
+            const allergies = [];
+            if (document.getElementById('peanut-free').checked) allergies.push('peanut-free restaurants');
+            if (document.getElementById('tree-nut-free').checked) allergies.push('tree nut-free restaurants');
+            if (document.getElementById('seafood-free').checked) allergies.push('seafood-free restaurants');
+            if (document.getElementById('dairy-free').checked) allergies.push('dairy-free restaurants');
+            if (document.getElementById('gluten-free').checked) allergies.push('gluten-free restaurants');
+            if (document.getElementById('soy-free').checked) allergies.push('soy-free restaurants');
+            return allergies.join(', ');
+        }
+
+        function getSelectedPreferences() {
+            const preferences = [];
+            if (document.getElementById('mexican').checked) preferences.push('mexican restaurants');
+            if (document.getElementById('chinese').checked) preferences.push('chinese restaurants');
+            if (document.getElementById('italian').checked) preferences.push('italian restaurants');
+            if (document.getElementById('indian').checked) preferences.push('indian restaurants');
+            if (document.getElementById('japanese').checked) preferences.push('japanese restaurants');
+            if (document.getElementById('mediterranean').checked) preferences.push('mediterranean restaurants');
+            if (document.getElementById('thai').checked) preferences.push('thai restaurants');
+            if (document.getElementById('french').checked) preferences.push('french restaurants');
+            return preferences.join(', ');
+        }
+
         // Search Yelp API
-        function searchYelp(query, location, map) {
-            const url = `https://api.yelp.com/v3/businesses/search?term=${query}&location=${location}`;
+        function searchYelp(term, location, map, allergies, preferences) {
+            const categories = [allergies, preferences].filter(Boolean).join(',');
+
+            const url = `https://api.yelp.com/v3/businesses/search?term=${term}&location=${location}&categories=${categories}`;
 
             fetch(url, {
                 method: 'GET',
@@ -126,6 +206,7 @@
 
             businesses.forEach(business => {
                 const marker = new google.maps.Marker({
+
                     position: {
                         lat: business.coordinates.latitude,
                         lng: business.coordinates.longitude
