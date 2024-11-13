@@ -29,7 +29,13 @@
             margin-right: 10px;
             font-size: 16px;
         }
-        #search-button {
+        #zip-code {
+            width: 100px;
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        #search-button, #location-button {
             padding: 10px 20px;
             font-size: 16px;
         }
@@ -46,12 +52,13 @@
     </div>
     <div id="search-container">
         <input type="text" id="search-bar" placeholder="Search for restaurants...">
+        <input type="text" id="zip-code" placeholder="ZIP Code">
         <button id="search-button">Search</button>
+        <button id="location-button">Use My Location</button>
     </div>
     <div id="map"></div>
 
     <script>
-        // Yelp API key
         const apiKey = 'mpUBLXDbRvr6QAxwIMOp3xssUgC76u61q43hL_YiCMeeqjJI1QZEXlbBUQdQe-WxGFXVQniQiLLdveIiIfLAWgEmsNXK4zpbpMCntX9-KtwV79uyW65Nq3VU6TUtZ3Yx';
 
         // Initialize the map
@@ -66,13 +73,31 @@
 
             document.getElementById('search-button').addEventListener('click', () => {
                 const searchQuery = document.getElementById('search-bar').value;
-                searchYelp(searchQuery, map);
+                const zipCode = document.getElementById('zip-code').value || 'Los Angeles, CA';
+                searchYelp(searchQuery, zipCode, map);
+            });
+
+            document.getElementById('location-button').addEventListener('click', () => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const coords = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        map.setCenter(coords);
+                        searchYelp('', `${coords.lat},${coords.lng}`, map);
+                    }, () => {
+                        alert('Geolocation failed or is not supported by your browser.');
+                    });
+                } else {
+                    alert('Geolocation is not supported by your browser.');
+                }
             });
         }
 
         // Search Yelp API
-        function searchYelp(query, map) {
-            const url = `https://api.yelp.com/v3/businesses/search?term=${query}&location=Los Angeles, CA`;
+        function searchYelp(query, location, map) {
+            const url = `https://api.yelp.com/v3/businesses/search?term=${query}&location=${location}`;
 
             fetch(url, {
                 method: 'GET',
@@ -109,39 +134,45 @@
                     title: business.name
                 });
 
-                // Fetch business details for image
-                fetch(`https://api.yelp.com/v3/businesses/${business.id}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
+                // Create a click event listener to show the InfoWindow
+                marker.addListener('click', () => {
+                    if (infoWindow) {
+                        infoWindow.close();
                     }
-                })
-                .then(response => response.json())
-                .then(details => {
-                    const infoContent = `
-                        <h3>${business.name}</h3>
-                        <p>${business.location.address1}</p>
-                        <p>${business.location.city}</p>
-                        <img src="${details.image_url}" alt="${business.name}" style="width:100px;">
-                    `;
+                    displayBusinessDetails(business, marker);
+                });
 
-                    const markerInfoWindow = new google.maps.InfoWindow({
-                        content: infoContent
-                    });
-
-                    marker.addListener('click', () => {
-                        if (infoWindow) {
-                            infoWindow.close();
-                        }
-                        infoWindow = markerInfoWindow;
-                        infoWindow.open(map, marker);
-                    });
-
-                    map.markers.push(marker);
-                })
-                .catch(error => console.error('Error:', error));
+                map.markers.push(marker);
             });
+        }
+
+        // Display business details using Yelp data
+        function displayBusinessDetails(business, marker) {
+            const url = `https://api.yelp.com/v3/businesses/${business.id}`;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const infoContent = `
+                    <h3>${data.name}</h3>
+                    <p>${data.location.address1}</p>
+                    <p>${data.location.city}</p>
+                    <img src="${data.image_url}" alt="${data.name}" style="width:100px;">
+                `;
+
+                infoWindow = new google.maps.InfoWindow({
+                    content: infoContent
+                });
+
+                infoWindow.open(map, marker);
+            })
+            .catch(error => console.error('Error:', error));
         }
 
         // Load the Google Maps script
