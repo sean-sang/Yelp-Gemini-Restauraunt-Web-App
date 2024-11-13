@@ -134,12 +134,12 @@
         }
 
         #allergy-settings label {
-            width: 30%; /* Control the width of each checkbox label */
+            width: 30%; 
             text-align: left; /* Align labels to the left */
         }
 
         #allergy-settings .spacer {
-            visibility: hidden; /* Hide the empty label but keep space */
+            visibility: hidden; 
         }
         #restaurant-list {
             width: 90%;
@@ -170,7 +170,36 @@
             color: blue;
             text-decoration: underline;
         }
+        .rating-info {
+            margin: 5px 0;
+            color: #666;
+        }
 
+        .restaurant-description {
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #666;
+        }
+
+        body.dark-mode .rating-info,
+        body.dark-mode .restaurant-description {
+            color: #ccc;
+        }
+
+        .restaurant-item {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        .restaurant-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        body.dark-mode .restaurant-item:hover {
+            background-color: #444;
+        }
 
 
 
@@ -194,7 +223,7 @@
         <button id="search-button">Search</button>
     </div>
     
-    <!-- Allergy and Food Preferences settings moved here -->
+    <!-- Allergy and Food Preferences settings  -->
     <div class="container">
         <div class="box" id="allergy-settings">
             <h2>Allergies Settings</h2>
@@ -240,16 +269,18 @@
     <script>
         const apiKey = 'mpUBLXDbRvr6QAxwIMOp3xssUgC76u61q43hL_YiCMeeqjJI1QZEXlbBUQdQe-WxGFXVQniQiLLdveIiIfLAWgEmsNXK4zpbpMCntX9-KtwV79uyW65Nq3VU6TUtZ3Yx'; // Business Yelp API Key
 
+        // Update the map initialization function
         function initMap() {
+            // Initialize the map
             map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 34.0575, lng: -117.8211 }, 
+                center: { lat: 34.0575, lng: -117.8211 },
                 zoom: 12
             });
-            
 
+            // Add event listeners after map is initialized
             document.getElementById('search-button').addEventListener('click', () => {
                 const searchQuery = document.getElementById('search-bar').value.trim();
-                const zipCode = document.getElementById('zip-code').value || '34.0575,-117.8211'; 
+                const zipCode = document.getElementById('zip-code').value || '34.0575,-117.8211';
                 const allergies = getSelectedAllergies();
                 const preferences = getSelectedPreferences();
 
@@ -258,29 +289,26 @@
             });
 
             document.getElementById('location-button').addEventListener('click', () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    const coords = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const coords = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
 
-                    // Initialize map center with user location
-                    map.setCenter(coords);
+                        map.setCenter(coords);
+                        getZipCode(coords.lat, coords.lng);
 
-                    // Reverse geocode to get ZIP code
-                    getZipCode(coords.lat, coords.lng);
-
-                    const allergies = getSelectedAllergies();
-                    const preferences = getSelectedPreferences();
-                    const term = preferences || 'restaurants';
-                    searchYelp(term, `${coords.lat},${coords.lng}`, map, allergies, preferences);
-                }, () => {
-                    alert('Geolocation failed or is not supported by your browser.');
-                });
-            } else {
-                alert('Geolocation is not supported by your browser.');
-            }
+                        const allergies = getSelectedAllergies();
+                        const preferences = getSelectedPreferences();
+                        const term = preferences || 'restaurants';
+                        searchYelp(term, `${coords.lat},${coords.lng}`, map, allergies, preferences);
+                    }, () => {
+                        alert('Geolocation failed or is not supported by your browser.');
+                    });
+                } else {
+                    alert('Geolocation is not supported by your browser.');
+                }
             });
         }
 
@@ -364,72 +392,126 @@
         }
 
        
+        function displayResults(businesses, map) {
+    const restaurantList = document.getElementById('restaurant-list');
+    restaurantList.innerHTML = ''; // Clear previous results
+
+    if (!map.markers) {
+        map.markers = [];
+    }
+
+    // Clear previous markers from the map
+    map.markers.forEach(marker => marker.setMap(null));
+    map.markers = []; // Reset markers array
+
+    // Create Places service instance
+    const placesService = new google.maps.places.PlacesService(map);
+
+    // Loop through businesses to add markers and list items
+    businesses.forEach((business, index) => {
+        // Add restaurant item to list
+        const listItem = document.createElement('div');
+        listItem.className = 'restaurant-item';
+        listItem.setAttribute('data-index', index);
         
-    function displayResults(businesses, map) {
-        const restaurantList = document.getElementById('restaurant-list');
-        restaurantList.innerHTML = ''; // Clear previous results
+        // Initially create the basic content
+        listItem.innerHTML = `
+            <h3>${business.name}</h3>
+            <p>${business.location.address1}, ${business.location.city}</p>
+            <img src="${business.image_url}" alt="${business.name}" style="width:100px; height:auto; display:block; margin:10px 0;">
+            <div class="description-placeholder">
+                <p class="restaurant-description">${business.categories.map(cat => cat.title).join(', ')}</p>
+                <p class="rating-info">Rating: ${business.rating} ⭐ (${business.review_count} reviews)</p>
+                <p>${business.price || ''} · ${formatPhoneNumber(business.phone)}</p>
+            </div>
+            <p class="show-on-map" onclick="showOnMap(${index})">Show on Map</p>
+        `;
+        
+        restaurantList.appendChild(listItem);
 
-        if (!map.markers) {
-            map.markers = [];
-        }
+        // Create marker for each business
+        const marker = new google.maps.Marker({
+            position: {
+                lat: business.coordinates.latitude,
+                lng: business.coordinates.longitude
+            },
+            map: map,
+            title: business.name
+        });
 
-        // Clear previous markers from the map
-        map.markers.forEach(marker => marker.setMap(null));
-        map.markers = []; // Reset markers array
-
-        // Loop through businesses to add markers and list items
-        businesses.forEach((business, index) => {
-            // Add restaurant item to list
-            const listItem = document.createElement('div');
-            listItem.className = 'restaurant-item';
-            listItem.setAttribute('data-index', index); // Set data-index for identification
-            listItem.innerHTML = `
-                <h3>${business.name}</h3>
-                <p>${business.location.address1}, ${business.location.city}</p>
-                <img src="${business.image_url}" alt="${business.name}" style="width:100px; height:auto; display:block; margin:10px 0;">
-                <p class="show-on-map" onclick="showOnMap(${index})">Show on Map</p>
-            `;
-            
-            restaurantList.appendChild(listItem);
-
-            // Create marker for each business
-            const marker = new google.maps.Marker({
-                position: {
-                    lat: business.coordinates.latitude,
-                    lng: business.coordinates.longitude
-                },
-                map: map,
-                title: business.name
-            });
-
-            // Info on the restauraunts after interaction with marker
-            const infoWindow = new google.maps.InfoWindow({
+        // Create info window content
+        const infoWindow = new google.maps.InfoWindow({
             content: `
                 <div>
-                    <h3 style="color: black;">${business.name}</h3> 
+                    <h3 style="color: black;">${business.name}</h3>
                     <img src="${business.image_url}" alt="${business.name}" style="width:100px; display:block; margin:10px 0;">
-                    <p style="color: black;">${business.location.address1}, ${business.location.city}</p> 
+                    <p style="color: black;">${business.location.address1}, ${business.location.city}</p>
                     <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(business.location.address1 + ', ' + business.location.city)}" target="_blank" style="display:block; text-align:center; margin-top:10px; color:blue;">Get Directions</a>
                 </div>
             `
-});
-
-
-
-            // Open info window when the marker is clicked and change font color of corresponding item
-            marker.addListener('click', () => {
-                if (map.infoWindow) map.infoWindow.close(); // Close any open info window
-                infoWindow.open(map, marker);
-                map.infoWindow = infoWindow;
-
-                // Change font color for the clicked restaurant item
-                highlightListItem(index);
-            });
-
-            // Store marker in map.markers array
-            map.markers.push(marker);
         });
-    }
+
+        // Open info window when the marker is clicked and change font color of corresponding item
+        marker.addListener('click', () => {
+            if (map.infoWindow) map.infoWindow.close();
+            infoWindow.open(map, marker);
+            map.infoWindow = infoWindow;
+            highlightListItem(index);
+        });
+
+        // Store marker in map.markers array
+        map.markers.push(marker);
+    });
+}
+
+        // Update your script loading at the bottom of your HTML
+        document.addEventListener('DOMContentLoaded', function() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&libraries=places&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        });
+
+
+        // Helper function to format phone numbers
+        function formatPhoneNumber(phone) {
+            if (!phone) return '';
+            const cleaned = ('' + phone).replace(/\D/g, '');
+            const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+            if (match) {
+                return '(' + match[1] + ') ' + match[2] + '-' + match[3];
+            }
+            return phone;
+        }
+
+        // Helper function to try getting additional details from Places API
+        function tryGetPlacesDescription(business, placesService, listItem) {
+            const request = {
+                query: `${business.name} ${business.location.address1}`,
+                fields: ['place_id']
+            };
+
+            placesService.findPlaceFromQuery(request, (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
+                    const placeId = results[0].place_id;
+                    
+                    placesService.getDetails({
+                        placeId: placeId,
+                        fields: ['editorial_summary']
+                    }, (place, detailsStatus) => {
+                        if (detailsStatus === google.maps.places.PlacesServiceStatus.OK && place && place.editorial_summary) {
+                            const descriptionElement = listItem.querySelector('.description-placeholder');
+                            const existingContent = descriptionElement.innerHTML;
+                            descriptionElement.innerHTML = `
+                                <p class="restaurant-description">${place.editorial_summary.overview}</p>
+                                ${existingContent}
+                            `;
+                        }
+                    });
+                }
+            });
+        }
 
     // Function to center the map on a selected marker, open info window, and highlight the item
     function showOnMap(index) {
