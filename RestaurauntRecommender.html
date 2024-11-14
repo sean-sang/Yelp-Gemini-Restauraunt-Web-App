@@ -201,6 +201,95 @@
             background-color: #444;
         }
 
+        #ai-search-container {
+            width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        body.dark-mode #ai-search-container {
+            background-color: #444;
+        }
+
+        .ai-search-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #ai-search-bar {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+        #ai-search-button {
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        #ai-search-button:hover {
+            background-color: #3367d6;
+        }
+
+        .ai-icon {
+            font-size: 20px;
+        }
+
+        #ai-response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        body.dark-mode #ai-response {
+            background-color: #555;
+        }
+
+        #ai-response.hidden {
+            display: none;
+        }
+
+        .ai-response-content {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        #use-recommendation {
+            padding: 8px 16px;
+            background-color: #34a853;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #use-recommendation:hover {
+            background-color: #2d8f47;
+        }
+
+        #use-recommendation.hidden {
+            display: none;
+        }
+
+
 
 
     </style>
@@ -222,6 +311,19 @@
         </div>
         <button id="search-button">Search</button>
     </div>
+<div id="ai-search-container">
+    <div class="ai-search-wrapper">
+        <input type="text" id="ai-search-bar" placeholder="Gemini Powered: Recommend Me A Restaurant">
+        <button id="ai-search-button">
+            <span class="ai-icon">🤖</span>
+            Get AI Recommendation
+        </button>
+    </div>
+    <div id="ai-response" class="hidden">
+        <div class="ai-response-content"></div>
+        <button id="use-recommendation" class="hidden">Use This Recommendation</button>
+    </div>
+</div>
     
     <!-- Allergy and Food Preferences settings  -->
     <div class="container">
@@ -258,17 +360,25 @@
                 <label><input type="checkbox" class="preference-checkbox" id="thai"> Thai</label>
                 <label><input type="checkbox" class="preference-checkbox" id="french"> French</label>
             </div>
+            <div>
+                <label><input type="checkbox" class="preference-checkbox" id="vegetarian"> Vegetarian</label>
+                <label><input type="checkbox" class="preference-checkbox" id="Nordic"> Mediterranean</label>
+                <label><input type="checkbox" class="preference-checkbox" id="thai"> Thai</label>
+                <label><input type="checkbox" class="preference-checkbox" id="french"> French</label>
+            </div>
         </div>
     </div>
+    
     
     <!-- Map and Restaurant List below the settings -->
     <div id="map"></div>
     <div id="restaurant-list"></div>
     
     
+    
     <script>
         const apiKey = 'mpUBLXDbRvr6QAxwIMOp3xssUgC76u61q43hL_YiCMeeqjJI1QZEXlbBUQdQe-WxGFXVQniQiLLdveIiIfLAWgEmsNXK4zpbpMCntX9-KtwV79uyW65Nq3VU6TUtZ3Yx'; // Business Yelp API Key
-
+        const GEMINI_API_KEY = 'AIzaSyDem0RVsOck3g19ay5ODZ7OEBJo29MaJhw'; // Replace with your actual Gemini API key
         // Update the map initialization function
         function initMap() {
             // Initialize the map
@@ -464,14 +574,6 @@
     });
 }
 
-        // Update your script loading at the bottom of your HTML
-        document.addEventListener('DOMContentLoaded', function() {
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&libraries=places&callback=initMap`;
-            script.async = true;
-            script.defer = true;
-            document.head.appendChild(script);
-        });
 
 
         // Helper function to format phone numbers
@@ -605,12 +707,101 @@ function showRestaurantInfo(business, map, marker = null) {
         .catch(error => console.error('Error:', error));
     }
 
-        // Load the Google Maps script
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&callback=initMap`;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
+    async function getAIRecommendation(prompt) {
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+    
+    try {
+        const response = await fetch(`${url}?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: `You are a restaurant recommendation expert. Based on this request: "${prompt}", suggest a type of cuisine/restaurant. 
+                        Format your response in exactly this way:
+                        CUISINE_TYPE: [single word or hyphenated cuisine type]
+                        EXPLANATION: [2-3 sentences explaining why]
+                        
+                        For example:
+                        CUISINE_TYPE: Thai
+                        EXPLANATION: Thai cuisine offers a perfect balance of sweet, sour, and spicy flavors. The variety of curries, noodles, and fresh ingredients would satisfy your craving for something flavorful and exciting.`
+                    }]
+                }]
+            })
+        });
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+    } catch (error) {
+        console.error('Error getting AI recommendation:', error);
+        return 'Sorry, I could not generate a recommendation at this time.';
+    }
+}
+
+// Initialize AI search functionality
+function initAISearch() {
+    const aiSearchButton = document.getElementById('ai-search-button');
+    const aiSearchBar = document.getElementById('ai-search-bar');
+    const aiResponse = document.getElementById('ai-response');
+    const aiResponseContent = document.querySelector('.ai-response-content');
+    const useRecommendationButton = document.getElementById('use-recommendation');
+
+    aiSearchButton.addEventListener('click', async () => {
+        const prompt = aiSearchBar.value.trim();
+        if (!prompt) return;
+
+        // Show loading state
+        aiSearchButton.disabled = true;
+        aiSearchButton.textContent = 'Getting Recommendation...';
+        aiResponse.classList.remove('hidden');
+        aiResponseContent.textContent = 'Thinking...';
+        useRecommendationButton.classList.add('hidden');
+
+        try {
+            const recommendation = await getAIRecommendation(prompt);
+            aiResponseContent.textContent = recommendation;
+            useRecommendationButton.classList.remove('hidden');
+        } catch (error) {
+            aiResponseContent.textContent = 'Sorry, there was an error getting your recommendation.';
+        } finally {
+            aiSearchButton.disabled = false;
+            aiSearchButton.innerHTML = '<span class="ai-icon">🤖</span>Get AI Recommendation';
+        }
+    });
+
+    useRecommendationButton.addEventListener('click', () => {
+        const recommendation = aiResponseContent.textContent;
+        // Extract just the cuisine type from the response
+        const cuisineMatch = recommendation.match(/CUISINE_TYPE:\s*(\S+)/);
+        if (cuisineMatch && cuisineMatch[1]) {
+            const cuisineType = cuisineMatch[1].toLowerCase();
+            const searchBar = document.getElementById('search-bar');
+            searchBar.value = cuisineType;
+            document.getElementById('search-button').click();
+            
+            // Also check the corresponding preference checkbox if it exists
+            const preferenceCheckbox = document.getElementById(cuisineType);
+            if (preferenceCheckbox) {
+                preferenceCheckbox.checked = true;
+            }
+        }
+    });
+}
+
+
+        // Update your script loading at the bottom of your HTML
+        document.addEventListener('DOMContentLoaded', function() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&libraries=places&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            initAISearch();
+            document.head.appendChild(script);
+        });
+
+        
     </script>
 </body>
 </html>
