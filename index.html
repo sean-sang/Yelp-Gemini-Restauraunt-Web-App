@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css" <!-- <link rel="stylesheet" href="output.css"> -->
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <!-- <script src="https://kit.fontawesome.com/c9f8a4022c.js"></script> -->
+    <title>Restaurant Recommender</title>
+</head>
+
+<body>
+    <button id="dark-mode-toggle">Toggle Dark Mode</button>
+
+    <div id="header">
+        <img id="logo" src="logo.png" alt="Restaurant Recommender Logo">
+        <h1>Restaurant Recommender</h1>
+    </div>
+
+    <div id="search-container">
+        <input type="text" id="search-bar" placeholder="Search for restaurants...">
+        <div class="location-options">
+            <input type="text" id="zip-code" placeholder="ZIP Code">
+            <button id="location-button">Use My Location</button>
+        </div>
+        <button id="search-button">Search</button>
+    </div>
+    <div id="ai-search-container">
+        <div class="ai-search-wrapper">
+            <input type="text" id="ai-search-bar" placeholder="Gemini Powered: Recommend Me A Restaurant">
+            <button id="ai-search-button">
+                <span class="ai-icon">🤖</span>
+                Get AI Recommendation
+            </button>
+        </div>
+        <div id="ai-response" class="hidden">
+            <div class="ai-response-content"></div>
+            <button id="use-recommendation" class="hidden">Use This Recommendation</button>
+        </div>
+    </div>
+
+    <!-- Allergy and Food Preferences settings  -->
+    <div class="container">
+        <div class="box" id="allergy-settings">
+            <h2>Allergen Settings</h2>
+            <div>
+                <label><input type="checkbox" class="allergy-checkbox" id="peanut-free"> Peanut-free</label>
+                <label><input type="checkbox" class="allergy-checkbox" id="tree-nut-free"> Tree nut-free</label>
+                <label><input type="checkbox" class="allergy-checkbox" id="seafood-free"> Seafood-free</label>
+            </div>
+            <div>
+                <label><input type="checkbox" class="allergy-checkbox" id="dairy-free"> Dairy-free</label>
+                <label><input type="checkbox" class="allergy-checkbox" id="gluten-free"> Gluten-free</label>
+                <label><input type="checkbox" class="allergy-checkbox" id="soy-free"> Soy-free</label>
+            </div>
+            <div>
+                <label><input type="checkbox" class="allergy-checkbox" id="fish-free"> Fish-free</label>
+                <label class="spacer"></label>
+                <label class="spacer"></label>
+            </div>
+        </div>
+
+        <div class="box" id="preferences-settings">
+            <h2>Food Preferences</h2>
+            <div>
+                <label><input type="checkbox" class="preference-checkbox" id="mexican"> Mexican</label>
+                <label><input type="checkbox" class="preference-checkbox" id="chinese"> Chinese</label>
+                <label><input type="checkbox" class="preference-checkbox" id="italian"> Italian</label>
+                <label><input type="checkbox" class="preference-checkbox" id="indian"> Indian</label>
+            </div>
+            <div>
+                <label><input type="checkbox" class="preference-checkbox" id="japanese"> Japanese</label>
+                <label><input type="checkbox" class="preference-checkbox" id="mediterranean"> Mediterranean</label>
+                <label><input type="checkbox" class="preference-checkbox" id="thai"> Thai</label>
+                <label><input type="checkbox" class="preference-checkbox" id="french"> French</label>
+            </div>
+            <div>
+                <label><input type="checkbox" class="preference-checkbox" id="vegetarian"> Vegetarian</label>
+                <label><input type="checkbox" class="preference-checkbox" id="Nordic"> Mediterranean</label>
+                <label><input type="checkbox" class="preference-checkbox" id="thai"> American</label>
+                <label><input type="checkbox" class="preference-checkbox" id="french"> Nordic</label>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Map and Restaurant List below the settings -->
+    <div id="map"></div>
+    <div id="restaurant-list"></div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
