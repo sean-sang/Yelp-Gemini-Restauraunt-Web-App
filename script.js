@@ -9,18 +9,24 @@ async function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 34.0575, lng: -117.8211 },
     zoom: 12,
+    gestureHandling: "greedy",
+    streetViewControl: false,
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
   });
 
   // Add event listeners after map is initialized
   document.getElementById("search-button").addEventListener("click", () => {
     const searchQuery = document.getElementById("search-bar").value.trim();
     const zipCode =
-      document.getElementById("zip-code").value || "34.0575,-117.8211";
+    document.getElementById("zip-code").value || "34.0575,-117.8211";
     const allergies = getSelectedAllergies();
     const preferences = getSelectedPreferences();
 
     const term = searchQuery || preferences || "restaurants";
     searchYelp(term, zipCode, map, allergies, preferences);
+
+    map.setZoom(12);
+    map.setCenter(getLocationByZip(zipCode));
   });
 
   document.getElementById("location-button").addEventListener("click", () => {
@@ -33,6 +39,7 @@ async function initMap() {
           };
 
           map.setCenter(coords);
+          map.setZoom(12);
           getZipCode(coords.lat, coords.lng);
 
           const allergies = getSelectedAllergies();
@@ -55,6 +62,7 @@ async function initMap() {
     }
   });
 }
+
 
 // Function to get ZIP code using Google Maps Geocoding API
 function getZipCode(lat, lng) {
@@ -82,6 +90,19 @@ function getZipCode(lat, lng) {
       console.error("Geocoder failed due to:", status);
     }
   });
+}
+
+function getLocationByZip(zipcode) {
+    const geocoder = new google.maps.Geocoder();
+
+    geocoder.geocode({ address: zipcode }, (results, status) => {
+        if (status === "OK" && results[0]) {
+            const location = results[0].geometry.location;
+            map.setCenter(location)
+        } else {
+
+        }
+    });
 }
 
 const darkModeToggle = document.getElementById("dark-mode-toggle");
@@ -147,6 +168,8 @@ function searchYelp(term, location, map, allergies, preferences) {
       displayResults(data.businesses, map);
     })
     .catch((error) => console.error("Error:", error));
+
+
 }
 
 function displayResults(businesses, map) {
@@ -173,15 +196,22 @@ function displayResults(businesses, map) {
 
     // Initially create the basic content
     listItem.innerHTML = `
-            <h3>${business.name}</h3>
-            <p>${business.location.address1}, ${business.location.city}</p>
-            <img src="${business.image_url}" alt="${business.name}" style="width:100px; height:auto; display:block; margin:10px 0;">
-            <div class="description-placeholder">
-                <p class="restaurant-description">${business.categories.map((cat) => cat.title).join(", ")}</p>
-                <p class="rating-info">Rating: ${business.rating} ⭐ (${business.review_count} reviews)</p>
-                <p>${business.price || ""} · ${formatPhoneNumber(business.phone)}</p>
+            <div class="restaurant-listing"> 
+              <img class="restaurant-image"src="${business.image_url}" alt="${business.name}" >
+              <div class="restuarant-details"> 
+                <h3 class="restaurant-name" style="font-weight:bold;">${business.name}</h3>
+                <p>${business.location.address1}, ${business.location.city}</p>
+                <div class="description-placeholder">
+                    <p class="restaurant-description">${business.categories.map((cat) => cat.title).join(", ")}</p>
+                    <p class="rating-info">Rating: ${business.rating} ⭐ (${business.review_count} reviews)</p>
+                    <p>${business.price || ""} | ${formatPhoneNumber(business.phone)}</p>
+                </div>
+                <div style="display:flex; align-content: center;">
+                    <p class="show-on-map" onclick="showOnMap(${index})">Show on Map</p>
+                    <i class="fa-solid fa-location-dot" style="padding-top: 5px;"></i>
+                </div>
+              </div>
             </div>
-            <p class="show-on-map" onclick="showOnMap(${index})">Show on Map</p>
         `;
 
     restaurantList.appendChild(listItem);
@@ -287,6 +317,10 @@ function showOnMap(index) {
   map.setCenter(marker.getPosition());
   google.maps.event.trigger(marker, "click"); // Simulate click to open info window
   highlightListItem(index);
+  const mapSection = document.getElementById("map");
+  if (mapSection) {
+    mapSection.scrollIntoView({ behavior: "smooth", block: "center"});
+  }
 }
 
 // Function to highlight a list item based on the index

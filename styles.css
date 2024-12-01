@@ -1,283 +1,360 @@
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f8f8;
-            color: #333;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8f8;
+    color: #333;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-        body.dark-mode {
-            background-color: #333;
-            color: #f8f8f8;
-        }
+body.dark-mode {
+    background-color: #333;
+    color: #f8f8f8;
+}
 
-        #header {
-            padding: 20px;
-            background-color: #f8f8f8;
-            text-align: center;
-            transition: background-color 0.3s ease;
-        }
-
-        body.dark-mode #header {
-            background-color: #333;
-        }
-
-        #logo {
-            width: 100px;
-            height: auto;
-        }
-
-        #search-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background-color: #f8f8f8;
-            text-align: center;
-            transition: background-color 0.3s ease;
-        }
-
-        body.dark-mode #search-container {
-            background-color: #333;
-        }
-
-        #search-bar {
-            display: block;
-            width: 80%;
-            margin: 10px auto;
-            padding: 12px;
-            font-size: 14px;
-        }
-
-        .location-options {
-            display: flex;
-            justify-content: center;
-            gap: 10px; /* Space between ZIP Code and Location button */
-            width: 100%; /* Full width to keep items aligned */
-            margin-top: 10px; /* Space between search bar and location options */
-        }
-
-        #zip-code {
-            width: 100px; /* Adjust width as needed */
-            height: 50px;
-        }
-
-        #location-button, #search-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-
-        #map {
-            height: 450px;
-            width: 90%;
-            margin: auto;
-        }
-
-        .container {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            background-color: #f8f8f8;
-            transition: background-color 0.3s ease;
-        }
-
-        body.dark-mode .container {
-            background-color: #333;
-        }
-
-        .box {
-            width: 48%;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #allergy-settings,
-        #preferences-settings {
-            text-align: center;
-        }
-
-        #allergy-settings div,
-        #preferences-settings div {
-            display: inline-block;
-            width: auto;
-            text-align: left;
-        }
-
-        #allergy-settings label, #preferences-settings label {
-            display: inline-block;
-            width: 48%;
-            margin: 5px;
-        }
-
-        #dark-mode-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-        #allergy-settings div {
+#top-bar {
     display: flex;
-    justify-content: space-around; /* Space items evenly */
+    flex-direction: row;
+    justify-content: flex-start; 
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#header {
+    padding: 20px;
+    background-color: #f8f8f8; */
+    text-align: bottom;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: space-around;
+}
+
+#header-text {
+    margin-left: 10px;
+}
+
+body.dark-mode #header {
+    background-color: #333;
+}
+
+#logo {
+    width: 100px;
+    height: auto;
+}
+
+#dark-mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 6px;
+    border-color: #ddd;
+}
+
+.fa-lightbulb {
+    margin-left: 10px;
+}
+
+        
+#search-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 13px;
+    width: 92%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#search-bar, #zip-code {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+#search-bar {
+    width: 300%;
+    font-size: 14px;
+    border-radius: 10px;
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#zip-code {
+    text-align: center;
+    font-size: 18px;
+}
+
+#search-button, #location-button {
+    padding: 10px 20px;
+    background-color: #4285F4;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+body.dark-mode #search-container {
+    background-color: #333;
+}
+
+
+.location-options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Space between ZIP Code and Location button */
+    width: 100%; /* Full width to keep items aligned */
+}
+
+
+.fa-magnifying-glass {
+    background-color: inherit;
+}
+
+
+
+#location-button:hover, #search-button:hover {
+    background-color: #3367D6;
+    transition: background-color 0.3s ease;
+}
+
+#map {
+    flex-grow: 1;
+    height: 600px;
+    background-color: #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #f8f8f8;
+    transition: background-color 0.3s ease;
+}
+
+body.dark-mode .container {
+    background-color: #333;
+} 
+
+.box {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.main-content {
+    display: flex;
+    flex-direction: row;
+}
+
+#allergy-settings,
+#preferences-settings {
+    text-align: center;
+}
+
+#allergy-settings div,
+#preferences-settings div {
+    display: inline-block;
+    width: auto;
+    text-align: left;
+}
+
+#allergy-settings label, #preferences-settings label {
+    display: inline-block;
+    width: 48%;
+    margin: 5px;
+}
+
+#allergy-settings div, #preferences-settings div {
+    display: flex;
+    justify-content: space-around; 
     width: 100%;
     margin-bottom: 10px;
-        }
+}
 
-        #allergy-settings label {
-            width: 30%; 
-            text-align: left; /* Align labels to the left */
-        }
+#allergy-settings label, #preferences-settings label {
+    width: 30%; 
+    text-align: left; /* Align labels to the left */
+}
 
-        #allergy-settings .spacer {
-            visibility: hidden; 
-        }
-        #restaurant-list {
-            width: 90%;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #f8f8f8;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
+#allergy-settings .spacer {
+    visibility: hidden; 
+} */
+#restaurant-list {
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
 
-        body.dark-mode #restaurant-list {
-            background-color: #333;
-            color: #f8f8f8;
-        }
+body.dark-mode #restaurant-list {
+    background-color: #333;
+    color: #f8f8f8;
+}
 
-        .restaurant-item {
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
-        }
+.restaurant-item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
 
-        .restaurant-item:last-child {
-            border-bottom: none;
-        }
+.restaurant-listing {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
 
-        .show-on-map {
-            margin-top: 5px;
-            cursor: pointer;
-            color: blue;
-            text-decoration: underline;
-        }
-        .rating-info {
-            margin: 5px 0;
-            color: #666;
-        }
+.restaurant-name {
+    font-size: 25px;
+}
 
-        .restaurant-description {
-            margin: 10px 0;
-            font-size: 14px;
-            line-height: 1.4;
-            color: #666;
-        }
+.restaurant-details {
+    display: flex;
+    flex-direction: column;
+}
 
-        body.dark-mode .rating-info,
-        body.dark-mode .restaurant-description {
-            color: #ccc;
-        }
+.restaurant-image {
+    width:200px;
+    height: 200px;
+    display:block;
+    margin:10px 15px;
 
-        .restaurant-item {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-            transition: background-color 0.3s ease;
-        }
+}
 
-        .restaurant-item:hover {
-            background-color: #f5f5f5;
-        }
+.restaurant-item:last-child {
+    border-bottom: none;
+}
 
-        body.dark-mode .restaurant-item:hover {
-            background-color: #444;
-        }
+.show-on-map {
+    margin-right: 8px;
+    margin-top: 5px;
+    cursor: pointer;
+    color: #007895;
+    text-decoration: underline;
+}
+.rating-info {
+    margin: 5px 0;
+    color: #666;
+}
 
-        #ai-search-container {
-            width: 90%;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            transition: background-color 0.3s ease;
-        }
+.restaurant-description {
+    margin: 10px 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #666;
+}
 
-        body.dark-mode #ai-search-container {
-            background-color: #444;
-        }
+body.dark-mode .rating-info,
+body.dark-mode .restaurant-description {
+    color: #ccc;
+}
 
-        .ai-search-wrapper {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+.restaurant-item {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.3s ease;
+}
 
-        #ai-search-bar {
-            flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            transition: border-color 0.3s ease;
-        }
+.restaurant-item:hover {
+    background-color: #f5f5f5;
+}
 
-        #ai-search-button {
-            padding: 10px 20px;
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.3s ease;
-        }
+body.dark-mode .restaurant-item:hover {
+    background-color: #444;
+}
 
-        #ai-search-button:hover {
-            background-color: #3367d6;
-        }
+#ai-search-container {
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 
-        .ai-icon {
-            font-size: 20px;
-        }
+body.dark-mode #ai-search-container {
+    background-color: #444;
+}
 
-        #ai-response {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            background-color: white;
-            transition: background-color 0.3s ease;
-        }
+.ai-search-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
 
-        body.dark-mode #ai-response {
-            background-color: #555;
-        }
+#ai-search-bar {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
 
-        #ai-response.hidden {
-            display: none;
-        }
+#ai-search-button {
+    padding: 10px 20px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+}
 
-        .ai-response-content {
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
+#ai-search-button:hover {
+    background-color: #3367d6;
+}
 
-        #use-recommendation {
-            padding: 8px 16px;
-            background-color: #34a853;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+.ai-icon {
+    font-size: 20px;
+}
 
-        #use-recommendation:hover {
-            background-color: #2d8f47;
-        }
+#ai-response {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: white;
+    transition: background-color 0.3s ease;
+}
 
-        #use-recommendation.hidden {
-            display: none;
-        }
+body.dark-mode #ai-response {
+    background-color: #555;
+}
+
+#ai-response.hidden {
+    display: none;
+}
+
+.ai-response-content {
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+#use-recommendation {
+    padding: 8px 16px;
+    background-color: #34a853;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#use-recommendation:hover {
+    background-color: #2d8f47;
+}
+
+#use-recommendation.hidden {
+    display: none;
+}
