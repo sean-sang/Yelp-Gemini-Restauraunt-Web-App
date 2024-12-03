@@ -16,18 +16,14 @@ async function initMap() {
 
   // Add event listeners after map is initialized
   document.getElementById("search-button").addEventListener("click", () => {
-    const searchQuery = document.getElementById("search-bar").value.trim();
-    const zipCode =
-    document.getElementById("zip-code").value || "34.0575,-117.8211";
-    const allergies = getSelectedAllergies();
-    const preferences = getSelectedPreferences();
-
-    const term = searchQuery || preferences || "restaurants";
-    searchYelp(term, zipCode, map, allergies, preferences);
-
-    map.setZoom(12);
-    map.setCenter(getLocationByZip(zipCode));
+    handleSearch();
   });
+
+  document.getElementById("search-bar").addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  })
 
   document.getElementById("location-button").addEventListener("click", () => {
     if (navigator.geolocation) {
@@ -63,6 +59,19 @@ async function initMap() {
   });
 }
 
+function handleSearch() {
+  const searchQuery = document.getElementById("search-bar").value.trim();
+  const zipCode =
+    document.getElementById("zip-code").value || "34.0575,-117.8211";
+  const allergies = getSelectedAllergies();
+  const preferences = getSelectedPreferences();
+
+  const term = searchQuery || preferences || "restaurants";
+  searchYelp(term, zipCode, map, allergies, preferences);
+
+  map.setZoom(12);
+  map.setCenter(getLocationByZip(zipCode));
+}
 
 // Function to get ZIP code using Google Maps Geocoding API
 function getZipCode(lat, lng) {
