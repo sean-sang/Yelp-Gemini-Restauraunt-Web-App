@@ -1,5 +1,5 @@
 const apiKey =
-  "mpUBLXDbRvr6QAxwIMOp3xssUgC76u61q43hL_YiCMeeqjJI1QZEXlbBUQdQe-WxGFXVQniQiLLdveIiIfLAWgEmsNXK4zpbpMCntX9-KtwV79uyW65Nq3VU6TUtZ3Yx"; // Business Yelp API Key
+  "--TyCyp48m9XnttVkQaQgocUEf6kWP6LT6pltAhqHIZaD6_3zOpdSnVbYT10DdOvR6Wdwno51LhxHcmJ-j8XOKMBg5oWPIKmsQge5sVsF1OUWJEg_XM2fi8CnhhQZ3Yx"; // Business Yelp API Key
 const GEMINI_API_KEY = "AIzaSyDem0RVsOck3g19ay5ODZ7OEBJo29MaJhw";
 
 // update the map initialization function
