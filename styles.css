@@ -196,7 +196,7 @@ body.dark-mode .container {
 
 #allergy-settings label, #preferences-settings label {
     width: 30%; 
-    text-align: left; /* Align labels to the left */
+    text-align: left;
 }
 
 #allergy-settings .spacer {

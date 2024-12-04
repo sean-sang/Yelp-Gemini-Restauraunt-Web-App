@@ -2,9 +2,9 @@ const apiKey =
   "mpUBLXDbRvr6QAxwIMOp3xssUgC76u61q43hL_YiCMeeqjJI1QZEXlbBUQdQe-WxGFXVQniQiLLdveIiIfLAWgEmsNXK4zpbpMCntX9-KtwV79uyW65Nq3VU6TUtZ3Yx"; // Business Yelp API Key
 const GEMINI_API_KEY = "AIzaSyDem0RVsOck3g19ay5ODZ7OEBJo29MaJhw";
 
-// Update the map initialization function
+// update the map initialization function
 async function initMap() {
-  // Initialize the map
+  // initialize the map
   const { Map } = await google.maps.importLibrary("maps");
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 34.0575, lng: -117.8211 },
@@ -28,7 +28,7 @@ async function initMap() {
   });
 
 
-  // Add event listeners after map is initialized
+  // add event listeners after map is initialized
   document.getElementById("search-button").addEventListener("click", () => {
     handleSearch();
   });
@@ -131,7 +131,7 @@ function getBoundsForCircle(center, radiusInMeters) {
   return bounds;
 }
 
-// function to get ZIP code using Google Maps Geocoding API
+// function to get zup code using Google Maps Geocoding apu
 function getZipCode(lat, lng) {
   const geocoder = new google.maps.Geocoder();
   const latLng = new google.maps.LatLng(lat, lng);
@@ -234,7 +234,7 @@ function getSelectedPreferences() {
   return preferences.join(", ");
 }
 
-// Search Yelp API
+// search yelp api
 function searchYelp(term, location, map, allergies, preferences, radius) {
   const categories = [allergies, preferences].filter(Boolean).join(",");
   console.log("radius in miles in searchYelp definition ", radius);
@@ -272,21 +272,21 @@ function displayResults(businesses, map) {
     map.markers = [];
   }
 
-  // Clear previous markers from the map
+  // clear previous markers from map
   map.markers.forEach((marker) => marker.setMap(null));
-  map.markers = []; // Reset markers array
+  map.markers = []; // reset markers array
 
-  // Create Places service instance
+  // create places service instance
   const placesService = new google.maps.places.PlacesService(map);
 
-  // Loop through businesses to add markers and list items
+  // loop through businesses to add markers and list items
   businesses.forEach((business, index) => {
-    // Add restaurant item to list
+    // add restaurant item to list
     const listItem = document.createElement("div");
     listItem.className = "restaurant-item";
     listItem.setAttribute("data-index", index);
 
-    // Initially create the basic content
+    // initially create the basic content
     listItem.innerHTML = `
             <div class="restaurant-listing"> 
               <img class="restaurant-image"src="${business.image_url}" alt="${business.name}" >
@@ -308,7 +308,7 @@ function displayResults(businesses, map) {
 
     restaurantList.appendChild(listItem);
 
-    // Create marker for each business
+    // create marker for each business
     const marker = new google.maps.Marker({
       position: {
         lat: business.coordinates.latitude,
@@ -318,7 +318,7 @@ function displayResults(businesses, map) {
       title: business.name,
     });
 
-    // Create info window content
+    // create info window content
     const infoWindow = new google.maps.InfoWindow({
       content: `
                 <div>
@@ -330,7 +330,7 @@ function displayResults(businesses, map) {
             `,
     });
 
-    // Open info window when the marker is clicked and change font color of corresponding item
+    // open info window when the marker is clicked and change font color of corresponding item
     marker.addListener("click", () => {
       if (map.infoWindow) map.infoWindow.close();
       infoWindow.open(map, marker);
@@ -338,21 +338,12 @@ function displayResults(businesses, map) {
       highlightListItem(index);
     });
 
-    // Store marker in map.markers array
+    // store marker in map.markers array
     map.markers.push(marker);
   });
 }
 
-// Update your script loading at the bottom of your HTML
-// document.addEventListener("DOMContentLoaded", function () {
-//   const script = document.createElement("script");
-//   script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&libraries=places&callback=initMap`;
-//   script.async = true;
-//   script.defer = true;
-//   document.head.appendChild(script);
-// });
-
-// Helper function to format phone numbers
+// helper function to format phone numbers
 function formatPhoneNumber(phone) {
   if (!phone) return "";
   const cleaned = ("" + phone).replace(/\D/g, "");
@@ -363,7 +354,7 @@ function formatPhoneNumber(phone) {
   return phone;
 }
 
-// Helper function to try getting additional details from Places API
+// helper function to try getting additional details from Places API
 function tryGetPlacesDescription(business, placesService, listItem) {
   const request = {
     query: `${business.name} ${business.location.address1}`,
@@ -415,14 +406,14 @@ function showOnMap(index) {
   }
 }
 
-// Function to highlight a list item based on the index
+// function to highlight a list item based on the index
 function highlightListItem(index) {
-  // Remove highlight from any previously highlighted item
+  // remove highlight from any previously highlighted item
   document.querySelectorAll(".restaurant-item h3").forEach((item) => {
-    item.style.color = ""; // Reset color
+    item.style.color = ""; // reset color
   });
 
-  // Set the font color of the clicked item to black
+  // set the font color of the clicked item to black
   const selectedItem = document.querySelector(
     `.restaurant-item[data-index="${index}"] h3`,
   );
@@ -464,7 +455,7 @@ function showRestaurantInfo(business, map, marker = null) {
     );
 }
 
-// Display business details using Yelp data
+// display business details using Yelp data
 function displayBusinessDetails(business, marker) {
   const url = `https://api.yelp.com/v3/businesses/${business.id}`;
 
@@ -477,7 +468,7 @@ function displayBusinessDetails(business, marker) {
   })
     .then((response) => response.json())
     .then((data) => {
-      // Construct Google Maps directions URL with city and state
+      // construct google maps directions url with city and state
       const address = `${data.name}, ${data.location.address1}, ${data.location.city}, ${data.location.state}`;
       const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
 
@@ -497,12 +488,6 @@ function displayBusinessDetails(business, marker) {
     })
     .catch((error) => console.error("Error:", error));
 }
-// Load the Google Maps script
-// const script = document.createElement('script');
-// script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&callback=initMap`;
-// script.async = true;
-// script.defer = true;
-// document.head.appendChild(script);
 
 async function getAIRecommendation(prompt) {
   const url =
@@ -542,7 +527,7 @@ async function getAIRecommendation(prompt) {
   }
 }
 
-// Initialize AI search functionality
+// initialize ai search functionality
 function initAISearch() {
   const aiSearchButton = document.getElementById("ai-search-button");
   const aiSearchBar = document.getElementById("ai-search-bar");
@@ -554,7 +539,7 @@ function initAISearch() {
     const prompt = aiSearchBar.value.trim();
     if (!prompt) return;
 
-    // Show loading state
+    // show loading state
     aiSearchButton.disabled = true;
     aiSearchButton.textContent = "Getting Recommendation...";
     aiResponse.classList.remove("hidden");
@@ -585,7 +570,7 @@ function initAISearch() {
       searchBar.value = cuisineType;
       document.getElementById("search-button").click();
 
-      // Also check the corresponding preference checkbox if it exists
+      // also check the corresponding preference checkbox if it exists
       const preferenceCheckbox = document.getElementById(cuisineType);
       if (preferenceCheckbox) {
         preferenceCheckbox.checked = true;
@@ -594,7 +579,7 @@ function initAISearch() {
   });
 }
 
-// Update your script loading at the bottom of your HTML
+// update your script loading at the bottom of your HTML
 document.addEventListener("DOMContentLoaded", function () {
   const script = document.createElement("script");
   script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&libraries=places&callback=initMap`;
