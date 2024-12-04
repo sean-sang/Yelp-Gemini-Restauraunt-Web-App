@@ -79,28 +79,29 @@ let marker; // Declare marker as a global variable to allow deletion
 let circle; // Keep the existing circle declaration
 
 function createCircleMarker(location) {
-  // Remove existing marker if it exists
+  // remove existing marker if it exists
   if (marker) {
     marker.setMap(null);
   }
 
-  // Remove existing circle if it exists
+  // remove existing circle if it exists
   if (circle) {
     circle.setMap(null);
   }
 
-  // Create new marker
+  // create new marker
   marker = new google.maps.Marker({
     position: location,
     map: map,
     draggable: true,
     icon: `http://maps.google.com/mapfiles/ms/icons/blue-dot.png`,
+    zIndex: 100,
   });
 
   // Create new circle
   circle = new google.maps.Circle({
     map: map,
-    radius: milesToMeters(5), // maps api uses meters: converting miles to meters
+    radius: milesToMeters(2), // maps api uses meters: converting miles to meters
     center: location,
     fillColor: "#3996d4",
     fillOpacity: 0.25,
@@ -159,22 +160,19 @@ function handleSearch() {
           lng: location.lng()
         };
 
-        // Update map center
-        map.setCenter(location);
-
-        // If no existing marker, create one. Otherwise, just update coordinates
+        // if no existing marker, create one. otherwise, just update coordinates
         if (!marker) {
           createCircleMarker(coords);
         } else {
-          // Update marker and circle without creating a new one
+          // update marker and circle without creating a new one
           marker.setPosition(location);
           circle.setCenter(location);
           
-          // Update zip code field
+          // update zip code field
           document.getElementById("zip-code").value = zipCode;
         }
 
-        // Perform Yelp search with the new coordinates
+        // perform Yelp search with the new coordinates
         searchYelp(
           term, 
           `${coords.lat},${coords.lng}`, 
@@ -184,7 +182,7 @@ function handleSearch() {
           radius
         );
 
-        // Adjust map bounds based on the circle
+        // adjust map bounds based on the circle
         const bounds = getBoundsForCircle(circle.getCenter(), radiusInMeters);
         map.fitBounds(bounds);
       } else {
@@ -193,7 +191,7 @@ function handleSearch() {
       }
     });
   } else {
-    // If it's already coordinates, proceed with normal search
+    // if it's already coordinates, proceed with normal search
     searchYelp(term, zipCode, map, allergies, preferences, radius);
     
     const bounds = getBoundsForCircle(circle.getCenter(), radiusInMeters);
@@ -207,12 +205,12 @@ document.getElementById("radius-slider").addEventListener("input", () => {
   const radiusLabel = document.getElementById("radius-label");
   radiusLabel.textContent = `${radiusInMiles} miles`;
 
-  // Ensure circle exists before setting radius
+  // ensure circle exists before setting radius
   if (circle) {
     // Simply update the radius without triggering a full search
     circle.setRadius(milesToMeters(radiusInMiles));
     
-    // Perform search with current marker location
+    // perform search with current marker location
     if (marker) {
       const currentLocation = marker.getPosition();
       searchYelp(
