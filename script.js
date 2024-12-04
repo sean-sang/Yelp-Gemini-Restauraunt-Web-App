@@ -19,12 +19,6 @@ async function initMap() {
     handleSearch();
   });
 
-  document.getElementById("search-bar").addEventListener("keypress", (event) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
-  })
-
   document.getElementById("location-button").addEventListener("click", () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -119,6 +113,12 @@ darkModeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark-mode");
 });
 
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    handleSearch();
+  }
+});
+
 function getSelectedAllergies() {
   const allergies = [];
   if (document.getElementById("peanut-free").checked)
@@ -148,6 +148,7 @@ function getSelectedPreferences() {
     preferences.push("italian restaurants");
   if (document.getElementById("indian").checked)
     preferences.push("indian restaurants");
+
   if (document.getElementById("japanese").checked)
     preferences.push("japanese restaurants");
   if (document.getElementById("mediterranean").checked)
@@ -156,6 +157,16 @@ function getSelectedPreferences() {
     preferences.push("thai restaurants");
   if (document.getElementById("french").checked)
     preferences.push("french restaurants");
+  if (document.getElementById("japanese").checked)
+    preferences.push("japanese restaurants");
+
+  if (document.getElementById("vegetarian").checked)
+    preferences.push("vegatarian restaurants");
+  if (document.getElementById("nordic").checked)
+    preferences.push("nordic restaurants");
+  if (document.getElementById("korean").checked)
+    preferences.push("korean restaurants");
+
   return preferences.join(", ");
 }
 
