@@ -108,6 +108,7 @@ function createCircleMarker(location) {
     strokeColor: "#1d80c2",
     strokeOpacity: 0.8,
     strokeWeight: 2,
+    clickable: false,
   });    
 
   circle.bindTo("center", marker, "position");
@@ -185,6 +186,7 @@ function handleSearch() {
         // adjust map bounds based on the circle
         const bounds = getBoundsForCircle(circle.getCenter(), radiusInMeters);
         map.fitBounds(bounds);
+
       } else {
         console.error("Geocoding failed:", status);
         alert("Could not find location for the entered zip code.");

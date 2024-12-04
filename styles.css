@@ -208,9 +208,18 @@ body.dark-mode .container {
     font-size: 25px;
 }
 
+#slider-container {
+    background-color: #4285F4;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
 #radius-label {
-    display: inline-block;
-    width: 100px;
+    width: 80px;
     text-align: left;
 }
 
