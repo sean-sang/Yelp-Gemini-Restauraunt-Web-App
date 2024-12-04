@@ -1,5 +1,5 @@
 const apiKey =
-  "--TyCyp48m9XnttVkQaQgocUEf6kWP6LT6pltAhqHIZaD6_3zOpdSnVbYT10DdOvR6Wdwno51LhxHcmJ-j8XOKMBg5oWPIKmsQge5sVsF1OUWJEg_XM2fi8CnhhQZ3Yx"; // Business Yelp API Key
+  "vRx_0oJAbWa-1rm78yHd1ohJdozc7t-4FSTvFJx10VOGMa3uez56uocEkrdJp-L3hlZkSqvxHS3QjAzSAjbHr8Zc_41vEup74kwqfMdZCwVZOM_fQkmlrdmaOixQZ3Yx"; // Business Yelp API Key
 const GEMINI_API_KEY = "AIzaSyDem0RVsOck3g19ay5ODZ7OEBJo29MaJhw";
 
 // update the map initialization function
@@ -75,7 +75,21 @@ function milesToMeters(miles) {
   return Math.round(miles * 1609.34);
 }
 
+let marker; // Declare marker as a global variable to allow deletion
+let circle; // Keep the existing circle declaration
+
 function createCircleMarker(location) {
+  // Remove existing marker if it exists
+  if (marker) {
+    marker.setMap(null);
+  }
+
+  // Remove existing circle if it exists
+  if (circle) {
+    circle.setMap(null);
+  }
+
+  // Create new marker
   marker = new google.maps.Marker({
     position: location,
     map: map,
@@ -83,6 +97,7 @@ function createCircleMarker(location) {
     icon: `http://maps.google.com/mapfiles/ms/icons/blue-dot.png`,
   });
 
+  // Create new circle
   circle = new google.maps.Circle({
     map: map,
     radius: milesToMeters(5), // maps api uses meters: converting miles to meters
@@ -95,7 +110,29 @@ function createCircleMarker(location) {
   });    
 
   circle.bindTo("center", marker, "position");
-};
+
+  google.maps.event.addListener(marker, 'dragend', function() {
+    const newPosition = marker.getPosition();
+    
+    // Update zip code based on new location
+    getZipCode(newPosition.lat(), newPosition.lng());
+    
+    // Perform search with new location
+    const radius = document.getElementById("radius-slider").value;
+    const allergies = getSelectedAllergies();
+    const preferences = getSelectedPreferences();
+    const term = preferences || "restaurants";
+    
+    searchYelp(
+      term,
+      `${newPosition.lat()},${newPosition.lng()}`,
+      map,
+      allergies,
+      preferences,
+      radius
+    );
+  });
+}
 
 function calculateZoomLevel(radius) {
   const zoom = Math.round(15 - Math.log(milesToMeters(radius) / Math.LN2));
@@ -104,19 +141,102 @@ function calculateZoomLevel(radius) {
 
 function handleSearch() {
   const searchQuery = document.getElementById("search-bar").value.trim();
-  const zipCode =
-    document.getElementById("zip-code").value || "34.0575,-117.8211";
+  const zipCode = document.getElementById("zip-code").value || "34.0575,-117.8211";
   const allergies = getSelectedAllergies();
   const preferences = getSelectedPreferences();
   const radius = document.getElementById("radius-slider").value;
   const radiusInMeters = milesToMeters(radius);
   const term = searchQuery || preferences || "restaurants";
 
-  searchYelp(term, zipCode, map, allergies, preferences, radius);
+  // If the zipCode looks like a numeric zip code, convert it to coordinates
+  if (/^\d{5}$/.test(zipCode)) {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: zipCode }, (results, status) => {
+      if (status === "OK" && results[0]) {
+        const location = results[0].geometry.location;
+        const coords = {
+          lat: location.lat(),
+          lng: location.lng()
+        };
 
-  const bounds = getBoundsForCircle(circle.getCenter(), radiusInMeters);
-  map.fitBounds(bounds);
+        // Update map center
+        map.setCenter(location);
+
+        // If no existing marker, create one. Otherwise, just update coordinates
+        if (!marker) {
+          createCircleMarker(coords);
+        } else {
+          // Update marker and circle without creating a new one
+          marker.setPosition(location);
+          circle.setCenter(location);
+          
+          // Update zip code field
+          document.getElementById("zip-code").value = zipCode;
+        }
+
+        // Perform Yelp search with the new coordinates
+        searchYelp(
+          term, 
+          `${coords.lat},${coords.lng}`, 
+          map, 
+          allergies, 
+          preferences, 
+          radius
+        );
+
+        // Adjust map bounds based on the circle
+        const bounds = getBoundsForCircle(circle.getCenter(), radiusInMeters);
+        map.fitBounds(bounds);
+      } else {
+        console.error("Geocoding failed:", status);
+        alert("Could not find location for the entered zip code.");
+      }
+    });
+  } else {
+    // If it's already coordinates, proceed with normal search
+    searchYelp(term, zipCode, map, allergies, preferences, radius);
+    
+    const bounds = getBoundsForCircle(circle.getCenter(), radiusInMeters);
+    map.fitBounds(bounds);
+  }
 }
+
+
+document.getElementById("radius-slider").addEventListener("input", () => {
+  const radiusInMiles = document.getElementById("radius-slider").value;
+  const radiusLabel = document.getElementById("radius-label");
+  radiusLabel.textContent = `${radiusInMiles} miles`;
+
+  // Ensure circle exists before setting radius
+  if (circle) {
+    // Simply update the radius without triggering a full search
+    circle.setRadius(milesToMeters(radiusInMiles));
+    
+    // Perform search with current marker location
+    if (marker) {
+      const currentLocation = marker.getPosition();
+      searchYelp(
+        document.getElementById("search-bar").value.trim() || getSelectedPreferences() || "restaurants", 
+        `${currentLocation.lat()},${currentLocation.lng()}`, 
+        map, 
+        getSelectedAllergies(), 
+        getSelectedPreferences(), 
+        radiusInMiles
+      );
+    }
+  }
+});
+
+document.getElementById("radius-slider").addEventListener("input", () => {
+  const radiusInMiles = document.getElementById("radius-slider").value;
+  const radiusLabel = document.getElementById("radius-label");
+  radiusLabel.textContent = `${radiusInMiles} miles`;
+
+  if (circle) {
+    circle.setRadius(milesToMeters(radiusInMiles));
+    handleSearch();
+  }
+});
 
 function getBoundsForCircle(center, radiusInMeters) {
   const bounds = new google.maps.LatLngBounds();
