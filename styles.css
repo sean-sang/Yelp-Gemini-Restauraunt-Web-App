@@ -81,11 +81,21 @@ body.dark-mode #header {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+body.dark-mode #search-bar {
+    background-color: #4d4d4d;
+    color: #f8f8f8;
+}
+
 #zip-code {
     text-align: center;
     font-size: 18px;
 }
 
+body.dark-mode #zip-code {
+    background-color: #4d4d4d;
+    color: #f8f8f8;
+}
+    
 #search-button, #location-button {
     padding: 10px 20px;
     background-color: #4285F4;
@@ -163,6 +173,12 @@ body.dark-mode .container {
     display: inline-block;
     width: auto;
     text-align: left;
+}
+
+#preferences-settings label {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
 }
 
 #allergy-settings label, #preferences-settings label {
@@ -282,6 +298,11 @@ body.dark-mode .restaurant-item:hover {
     border-radius: 10px;
     transition: background-color 0.3s ease;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+body.dark-mode #ai-search-bar {
+    background-color: #4d4d4d;
+    color: #f8f8f8;
 }
 
 body.dark-mode #ai-search-container {
