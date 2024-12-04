@@ -8,7 +8,7 @@ async function initMap() {
   const { Map } = await google.maps.importLibrary("maps");
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 34.0575, lng: -117.8211 },
-    zoom: 12,
+    zoom: 13,
     gestureHandling: "greedy",
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -43,7 +43,7 @@ async function initMap() {
           };
 
           map.setCenter(coords);
-          map.setZoom(12);
+          map.setZoom(13);
           createCircleMarker(coords);
           getZipCode(coords.lat, coords.lng);
 
