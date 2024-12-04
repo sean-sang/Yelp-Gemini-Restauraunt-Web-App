@@ -115,16 +115,14 @@ body.dark-mode #search-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px; /* Space between ZIP Code and Location button */
-    width: 100%; /* Full width to keep items aligned */
+    gap: 10px;
+    width: 100%; 
 }
 
 
 .fa-magnifying-glass {
     background-color: inherit;
 }
-
-
 
 #location-button:hover, #search-button:hover {
     background-color: #3367D6;
@@ -162,6 +160,8 @@ body.dark-mode .container {
     display: flex;
     flex-direction: row;
 }
+
+
 
 #allergy-settings,
 #preferences-settings {
@@ -201,6 +201,17 @@ body.dark-mode .container {
 
 #allergy-settings .spacer {
     visibility: hidden; 
+}
+
+#slider-container {
+    margin-top: 10px;
+    font-size: 25px;
+}
+
+#radius-label {
+    display: inline-block;
+    width: 100px;
+    text-align: left;
 }
 
 #restaurant-list {
@@ -368,7 +379,7 @@ body.dark-mode #ai-response {
 
 #use-recommendation {
     padding: 8px 16px;
-    background-color: #34a853;
+    background-color: #4285f4;
     color: white;
     border: none;
     border-radius: 4px;
@@ -377,7 +388,7 @@ body.dark-mode #ai-response {
 }
 
 #use-recommendation:hover {
-    background-color: #2d8f47;
+    background-color: #3367d6;
 }
 
 #use-recommendation.hidden {

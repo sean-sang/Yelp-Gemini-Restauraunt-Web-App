@@ -14,6 +14,20 @@ async function initMap() {
     mapTypeId: google.maps.MapTypeId.ROADMAP,
   });
 
+  createCircleMarker({ lat: 34.0575, lng: -117.8211 });
+
+  const slider = document.getElementById("radius-slider");
+  const radiusLabel = document.getElementById("radius-label");
+
+  slider.addEventListener("input", () => {
+   const radiusInMiles = slider.value;
+   radiusLabel.textContent = `${radiusInMiles} miles`;
+
+   circle.setRadius(radiusInMiles * 1609.34);
+   handleSearch();
+  });
+
+
   // Add event listeners after map is initialized
   document.getElementById("search-button").addEventListener("click", () => {
     handleSearch();
@@ -30,17 +44,21 @@ async function initMap() {
 
           map.setCenter(coords);
           map.setZoom(12);
+          createCircleMarker(coords);
           getZipCode(coords.lat, coords.lng);
 
           const allergies = getSelectedAllergies();
           const preferences = getSelectedPreferences();
           const term = preferences || "restaurants";
+          const radius = document.getElementById("radius-slider").value;
+          console.log(radius, "radius in initMap");
           searchYelp(
             term,
             `${coords.lat},${coords.lng}`,
             map,
             allergies,
             preferences,
+            radius, 
           );
         },
         () => {
@@ -53,21 +71,67 @@ async function initMap() {
   });
 }
 
+function milesToMeters(miles) {
+  return Math.round(miles * 1609.34);
+}
+
+function createCircleMarker(location) {
+  marker = new google.maps.Marker({
+    position: location,
+    map: map,
+    draggable: true,
+    icon: `http://maps.google.com/mapfiles/ms/icons/blue-dot.png`,
+  });
+
+  circle = new google.maps.Circle({
+    map: map,
+    radius: milesToMeters(5), // maps api uses meters: converting miles to meters
+    center: location,
+    fillColor: "#3996d4",
+    fillOpacity: 0.25,
+    strokeColor: "#1d80c2",
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+  });    
+
+  circle.bindTo("center", marker, "position");
+};
+
+function calculateZoomLevel(radius) {
+  const zoom = Math.round(15 - Math.log(milesToMeters(radius) / Math.LN2));
+  return Math.min(Math.max(zoom, 1), 21);
+};
+
 function handleSearch() {
   const searchQuery = document.getElementById("search-bar").value.trim();
   const zipCode =
     document.getElementById("zip-code").value || "34.0575,-117.8211";
   const allergies = getSelectedAllergies();
   const preferences = getSelectedPreferences();
-
+  const radius = document.getElementById("radius-slider").value;
+  const radiusInMeters = milesToMeters(radius);
   const term = searchQuery || preferences || "restaurants";
-  searchYelp(term, zipCode, map, allergies, preferences);
 
-  map.setZoom(12);
-  map.setCenter(getLocationByZip(zipCode));
+  searchYelp(term, zipCode, map, allergies, preferences, radius);
+
+  const bounds = getBoundsForCircle(circle.getCenter(), radiusInMeters);
+  map.fitBounds(bounds);
 }
 
-// Function to get ZIP code using Google Maps Geocoding API
+function getBoundsForCircle(center, radiusInMeters) {
+  const bounds = new google.maps.LatLngBounds();
+
+  // compute the positions of the circle boundary points (N, S, E, W)
+  const northEast = google.maps.geometry.spherical.computeOffset(center, radiusInMeters, 45); // NE corner
+  const southWest = google.maps.geometry.spherical.computeOffset(center, radiusInMeters, 225); // SW corner
+
+  bounds.extend(northEast);
+  bounds.extend(southWest);
+
+  return bounds;
+}
+
+// function to get ZIP code using Google Maps Geocoding API
 function getZipCode(lat, lng) {
   const geocoder = new google.maps.Geocoder();
   const latLng = new google.maps.LatLng(lat, lng);
@@ -75,13 +139,13 @@ function getZipCode(lat, lng) {
   geocoder.geocode({ location: latLng }, (results, status) => {
     if (status === google.maps.GeocoderStatus.OK) {
       if (results[0]) {
-        // Find the ZIP code in the address components
+        // find the zip code in the address components
         const addressComponents = results[0].address_components;
         const zipCodeComponent = addressComponents.find((component) =>
           component.types.includes("postal_code"),
         );
 
-        // Update the ZIP Code field if a ZIP code is found
+        // update the zip code field if a zip code is found
         if (zipCodeComponent) {
           document.getElementById("zip-code").value =
             zipCodeComponent.long_name;
@@ -171,10 +235,18 @@ function getSelectedPreferences() {
 }
 
 // Search Yelp API
-function searchYelp(term, location, map, allergies, preferences) {
+function searchYelp(term, location, map, allergies, preferences, radius) {
   const categories = [allergies, preferences].filter(Boolean).join(",");
-
-  const url = `https://api.yelp.com/v3/businesses/search?term=${term}&location=${location}&categories=${categories}`;
+  console.log("radius in miles in searchYelp definition ", radius);
+  console.log("radius in meters in searchYelp definition ", milesToMeters(radius));
+  const params = new URLSearchParams({
+    term: term,
+    location: location,
+    preferences: preferences,
+    allergies: allergies,
+    radius: milesToMeters(radius),    
+  });
+  const url = `https://api.yelp.com/v3/businesses/search?${params.toString()}`;
 
   fetch(url, {
     method: "GET",
@@ -272,13 +344,13 @@ function displayResults(businesses, map) {
 }
 
 // Update your script loading at the bottom of your HTML
-document.addEventListener("DOMContentLoaded", function () {
-  const script = document.createElement("script");
-  script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&libraries=places&callback=initMap`;
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
-});
+// document.addEventListener("DOMContentLoaded", function () {
+//   const script = document.createElement("script");
+//   script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB-VjpNM72mRTsjoyr4t_u5gqENatzFL48&libraries=places&callback=initMap`;
+//   script.async = true;
+//   script.defer = true;
+//   document.head.appendChild(script);
+// });
 
 // Helper function to format phone numbers
 function formatPhoneNumber(phone) {
@@ -449,12 +521,12 @@ async function getAIRecommendation(prompt) {
               {
                 text: `You are a restaurant recommendation expert. Based on this request: "${prompt}", suggest a type of cuisine/restaurant. 
                         Format your response in exactly this way:
-                        CUISINE_TYPE: [single word or hyphenated cuisine type]
-                        EXPLANATION: [2-3 sentences explaining why]
+                        Cuisine Type: [single word or hyphenated cuisine type]
+                        Explanation: [2-3 sentences explaining why]
                         
                         For example:
-                        CUISINE_TYPE: Thai
-                        EXPLANATION: Thai cuisine offers a perfect balance of sweet, sour, and spicy flavors. The variety of curries, noodles, and fresh ingredients would satisfy your craving for something flavorful and exciting.`,
+                        Cuisine type: Thai
+                        Explanation: Thai cuisine offers a perfect balance of sweet, sour, and spicy flavors. The variety of curries, noodles, and fresh ingredients would satisfy your craving for something flavorful and exciting.`,
               },
             ],
           },
@@ -506,7 +578,7 @@ function initAISearch() {
   useRecommendationButton.addEventListener("click", () => {
     const recommendation = aiResponseContent.textContent;
     // Extract just the cuisine type from the response
-    const cuisineMatch = recommendation.match(/CUISINE_TYPE:\s*(\S+)/);
+    const cuisineMatch = recommendation.match(/Cuisine Type:\s*(\S+)/);
     if (cuisineMatch && cuisineMatch[1]) {
       const cuisineType = cuisineMatch[1].toLowerCase();
       const searchBar = document.getElementById("search-bar");
