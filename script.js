@@ -1,5 +1,5 @@
 const apiKey =
-  "Fe1OjnfHoQ1Hytl_7ZqTEG7jU8KoVayiIdvuX9bmgjD5CegxpV4TBwyJQgki9WX_MxNy6VFEHWmSIxpRnloFHn8eR8wRAB5CpU8uMppB-mOhiqXfx8Zpt5WVeAtRZ3Yx"; // Business Yelp API Key
+  "nXETPuivZdUVyDZ-yXlaiPjCe10VqvbxdznAA1JIClEaAUaRj6k1tjcH-22erom175_GSdmL54qwDFqiVGTZsks865U9YpIP7h6rZqPI8BbhMfWUoFW9xoxGvzlRZ3Yx"; // Business Yelp API Key
 const GEMINI_API_KEY = "AIzaSyDem0RVsOck3g19ay5ODZ7OEBJo29MaJhw";
 
 // update the map initialization function
@@ -513,7 +513,6 @@ function tryGetPlacesDescription(business, placesService, listItem) {
 // Function to center the map on a selected marker, open info window, and highlight the item
 function showOnMap(index) {
   const marker = map.markers[index];
-  map.setCenter(marker.getPosition());
   google.maps.event.trigger(marker, "click"); // Simulate click to open info window
   highlightListItem(index);
   const mapSection = document.getElementById("map");

@@ -218,6 +218,10 @@ body.dark-mode .container {
     font-weight: 600;
 }
 
+#ai-response-content {
+    background-color: #4285F4;
+}
+
 #radius-label {
     width: 80px;
     text-align: left;
