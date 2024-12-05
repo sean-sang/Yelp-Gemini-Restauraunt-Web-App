@@ -380,6 +380,49 @@ function searchYelp(term, location, map, allergies, preferences, radius) {
 
 }
 
+function fetchGoogleReviews(business, placesService) {
+  return new Promise((resolve, reject) => {
+    const searchQuery = `${business.name} ${business.location.address1}, ${business.location.city}`;
+    
+    console.log('Searching for place:', searchQuery);
+
+    const request = {
+      query: searchQuery,
+      fields: ['place_id', 'name', 'formatted_address']
+    };
+
+    placesService.findPlaceFromQuery(request, (results, status) => {
+      console.log('findPlaceFromQuery status:', status);
+      console.log('Results:', results);
+
+      if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
+        const placeId = results[0].place_id;
+        console.log('Found Place ID:', placeId);
+
+        placesService.getDetails(
+          {
+            placeId: placeId,
+            fields: ['reviews', 'name']
+          },
+          (place, detailsStatus) => {
+            console.log('getDetails status:', detailsStatus);
+            console.log('Place details:', place);
+
+            if (detailsStatus === google.maps.places.PlacesServiceStatus.OK && place && place.reviews) {
+              resolve(place.reviews.slice(0, 2));
+            } else {
+              console.warn('No reviews found or unable to fetch details');
+              resolve([]);
+            }
+          }
+        );
+      } else {
+        console.warn('Unable to find place');
+        resolve([]);
+      }
+    });
+  });
+}
 function displayResults(businesses, map) {
   const restaurantList = document.getElementById("restaurant-list");
   restaurantList.innerHTML = ""; // Clear previous results
@@ -397,32 +440,60 @@ function displayResults(businesses, map) {
 
   // loop through businesses to add markers and list items
   businesses.forEach((business, index) => {
-    // add restaurant item to list
+    // add restaurant item to list immediately
     const listItem = document.createElement("div");
     listItem.className = "restaurant-item";
     listItem.setAttribute("data-index", index);
 
     // initially create the basic content
     listItem.innerHTML = `
-            <div class="restaurant-listing"> 
-              <img class="restaurant-image"src="${business.image_url}" alt="${business.name}" >
-              <div class="restuarant-details"> 
-                <h3 class="restaurant-name" style="font-weight:bold;">${business.name}</h3>
-                <p>${business.location.address1}, ${business.location.city}</p>
-                <div class="description-placeholder">
-                    <p class="restaurant-description">${business.categories.map((cat) => cat.title).join(", ")}</p>
-                    <p class="rating-info">Rating: ${business.rating} ⭐ (${business.review_count} reviews)</p>
-                    <p>${business.price || ""} | ${formatPhoneNumber(business.phone)}</p>
-                </div>
-                <div style="display:flex; align-content: center;">
-                    <p class="show-on-map" onclick="showOnMap(${index})">Show on Map</p>
-                    <i class="fa-solid fa-location-dot" style="padding-top: 5px;"></i>
-                </div>
-              </div>
-            </div>
-        `;
+      <div class="restaurant-listing"> 
+        <img class="restaurant-image" src="${business.image_url}" alt="${business.name}">
+        <div class="restaurant-details"> 
+          <h3 class="restaurant-name" style="font-weight:bold;">${business.name}</h3>
+          <p>${business.location.address1}, ${business.location.city}</p>
+          <div class="description-placeholder">
+            <p class="restaurant-description">${business.categories.map((cat) => cat.title).join(", ")}</p>
+            <p class="rating-info">Rating: ${business.rating} ⭐ (${business.review_count} reviews)</p>
+            <p>${business.price || ""} | ${formatPhoneNumber(business.phone)}</p>
+          </div>
+          <div class="reviews-section" id="reviews-${index}">
+            <h4>Recent Reviews</h4>
+            <p>Loading reviews...</p>
+          </div>
+          <div style="display:flex; align-content: center;">
+            <p class="show-on-map" onclick="showOnMap(${index})">Show on Map</p>
+            <i class="fa-solid fa-location-dot" style="padding-top: 5px;"></i>
+          </div>
+        </div>
+      </div>
+    `;
 
     restaurantList.appendChild(listItem);
+
+    fetchGoogleReviews(business, placesService)
+      .then(reviews => {
+        const reviewsSection = document.getElementById(`reviews-${index}`);
+        if (reviews.length > 0) {
+          const reviewsHtml = reviews.map(review => `
+            <div class="review">
+              <p class="review-text">"${review.text}"</p>
+              <div class="review-meta">
+                <span class="review-author">${review.author_name}</span>
+                <span class="review-rating">${"⭐".repeat(review.rating)}</span>
+              </div>
+            </div>
+          `).join('');
+          reviewsSection.innerHTML = `<h4>Recent Reviews</h4>${reviewsHtml}`;
+        } else {
+          reviewsSection.innerHTML = '<h4>Recent Reviews</h4><p>No reviews available</p>';
+        }
+      })
+      .catch(error => {
+        const reviewsSection = document.getElementById(`reviews-${index}`);
+        reviewsSection.innerHTML = '<h4>Recent Reviews</h4><p>Error loading reviews</p>';
+        console.error(`Error fetching reviews for ${business.name}:`, error);
+      });
 
     // create marker for each business
     const marker = new google.maps.Marker({
@@ -437,13 +508,13 @@ function displayResults(businesses, map) {
     // create info window content
     const infoWindow = new google.maps.InfoWindow({
       content: `
-                <div>
-                    <h3 style="color: black;">${business.name}</h3>
-                    <img src="${business.image_url}" alt="${business.name}" style="width:100px; display:block; margin:10px 0;">
-                    <p style="color: black;">${business.location.address1}, ${business.location.city}</p>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(business.location.address1 + ", " + business.location.city)}" target="_blank" style="display:block; text-align:center; margin-top:10px; color:blue;">Get Directions</a>
-                </div>
-            `,
+        <div>
+          <h3 style="color: black;">${business.name}</h3>
+          <img src="${business.image_url}" alt="${business.name}" style="width:100px; display:block; margin:10px 0;">
+          <p style="color: black;">${business.location.address1}, ${business.location.city}</p>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(business.location.address1 + ", " + business.location.city)}" target="_blank" style="display:block; text-align:center; margin-top:10px; color:blue;">Get Directions</a>
+        </div>
+      `,
     });
 
     // open info window when the marker is clicked and change font color of corresponding item
