@@ -23,7 +23,9 @@ async function initMap() {
    const radiusInMiles = slider.value;
    radiusLabel.textContent = `${radiusInMiles} miles`;
 
+   circle.setCenter(marker.LatLng);
    circle.setRadius(radiusInMiles * 1609.34);
+
    handleSearch();
   });
 
@@ -165,6 +167,7 @@ function handleSearch() {
         if (!marker) {
           createCircleMarker(coords);
         } else {
+
           // update marker and circle without creating a new one
           marker.setPosition(location);
           circle.setCenter(location);
