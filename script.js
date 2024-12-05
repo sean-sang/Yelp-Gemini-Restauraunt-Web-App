@@ -1,5 +1,5 @@
 const apiKey =
-  "vRx_0oJAbWa-1rm78yHd1ohJdozc7t-4FSTvFJx10VOGMa3uez56uocEkrdJp-L3hlZkSqvxHS3QjAzSAjbHr8Zc_41vEup74kwqfMdZCwVZOM_fQkmlrdmaOixQZ3Yx"; // Business Yelp API Key
+  "--TyCyp48m9XnttVkQaQgocUEf6kWP6LT6pltAhqHIZaD6_3zOpdSnVbYT10DdOvR6Wdwno51LhxHcmJ-j8XOKMBg5oWPIKmsQge5sVsF1OUWJEg_XM2fi8CnhhQZ3Yx"; // Business Yelp API Key
 const GEMINI_API_KEY = "AIzaSyDem0RVsOck3g19ay5ODZ7OEBJo29MaJhw";
 
 // update the map initialization function
@@ -23,12 +23,10 @@ async function initMap() {
    const radiusInMiles = slider.value;
    radiusLabel.textContent = `${radiusInMiles} miles`;
 
-   circle.setCenter(marker.LatLng);
    circle.setRadius(radiusInMiles * 1609.34);
 
    handleSearch();
   });
-
 
   // add event listeners after map is initialized
   document.getElementById("search-button").addEventListener("click", () => {
@@ -53,7 +51,6 @@ async function initMap() {
           const preferences = getSelectedPreferences();
           const term = preferences || "restaurants";
           const radius = document.getElementById("radius-slider").value;
-          console.log(radius, "radius in initMap");
           searchYelp(
             term,
             `${coords.lat},${coords.lng}`,
@@ -118,8 +115,9 @@ function createCircleMarker(location) {
   google.maps.event.addListener(marker, 'dragend', function() {
     const newPosition = marker.getPosition();
     
-    // Update zip code based on new location
-    getZipCode(newPosition.lat(), newPosition.lng());
+    // update zip code field to searching in circle area
+    document.getElementById("zip-code").value = "Current circle area";
+
     
     // Perform search with new location
     const radius = document.getElementById("radius-slider").value;
@@ -163,19 +161,7 @@ function handleSearch() {
           lng: location.lng()
         };
 
-        // if no existing marker, create one. otherwise, just update coordinates
-        if (!marker) {
-          createCircleMarker(coords);
-        } else {
-
-          // update marker and circle without creating a new one
-          marker.setPosition(location);
-          circle.setCenter(location);
-          
-          // update zip code field
-          document.getElementById("zip-code").value = zipCode;
-        }
-
+       circle.setCenter(location);
         // perform Yelp search with the new coordinates
         searchYelp(
           term, 
@@ -204,6 +190,9 @@ function handleSearch() {
   }
 }
 
+document.getElementById("zip-code").addEventListener("focus", function () {
+  this.select(); // Highlights all text in the input
+});
 
 document.getElementById("radius-slider").addEventListener("input", () => {
   const radiusInMiles = document.getElementById("radius-slider").value;
@@ -360,8 +349,6 @@ function getSelectedPreferences() {
 // search yelp api
 function searchYelp(term, location, map, allergies, preferences, radius) {
   const categories = [allergies, preferences].filter(Boolean).join(",");
-  console.log("radius in miles in searchYelp definition ", radius);
-  console.log("radius in meters in searchYelp definition ", milesToMeters(radius));
   const params = new URLSearchParams({
     term: term,
     location: location,
