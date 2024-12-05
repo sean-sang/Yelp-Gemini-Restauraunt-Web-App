@@ -123,8 +123,9 @@ function createCircleMarker(location) {
     const radius = document.getElementById("radius-slider").value;
     const allergies = getSelectedAllergies();
     const preferences = getSelectedPreferences();
-    const term = preferences || "restaurants";
-    
+    const searchQuery = document.getElementById("search-bar").value.trim();
+    const term = searchQuery || preferences || "restaurants";
+
     searchYelp(
       term,
       `${newPosition.lat()},${newPosition.lng()}`,
@@ -182,8 +183,17 @@ function handleSearch() {
       }
     });
   } else {
-    // if it's already coordinates, proceed with normal search
-    searchYelp(term, zipCode, map, allergies, preferences, radius);
+    // if it's already coordinates, proceed with search based on circle
+      const newPosition = circle.getCenter();
+      searchYelp(
+      term,
+      `${newPosition.lat()},${newPosition.lng()}`,
+      map,
+      allergies,
+      preferences,
+      radius
+    );
+    // searchYelp(term, zipCode, map, allergies, preferences, radius);
     
     const bounds = getBoundsForCircle(circle.getCenter(), radiusInMeters);
     map.fitBounds(bounds);
