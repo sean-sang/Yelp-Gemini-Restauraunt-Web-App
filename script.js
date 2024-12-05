@@ -47,7 +47,7 @@ async function initMap() {
           createCircleMarker(coords);
           getZipCode(coords.lat, coords.lng);
 
-          const allergies = getSelectedAllergies();
+          const allergies = getSelectedDietaryRestrictions();
           const preferences = getSelectedPreferences();
           const term = preferences || "restaurants";
           const radius = document.getElementById("radius-slider").value;
@@ -121,7 +121,7 @@ function createCircleMarker(location) {
     
     // Perform search with new location
     const radius = document.getElementById("radius-slider").value;
-    const allergies = getSelectedAllergies();
+    const allergies = getSelectedDietaryRestrictions();
     const preferences = getSelectedPreferences();
     const searchQuery = document.getElementById("search-bar").value.trim();
     const term = searchQuery || preferences || "restaurants";
@@ -145,7 +145,7 @@ function calculateZoomLevel(radius) {
 function handleSearch() {
   const searchQuery = document.getElementById("search-bar").value.trim();
   const zipCode = document.getElementById("zip-code").value || "34.0575,-117.8211";
-  const allergies = getSelectedAllergies();
+  const allergies = getSelectedDietaryRestrictions();
   const preferences = getSelectedPreferences();
   const radius = document.getElementById("radius-slider").value;
   const radiusInMeters = milesToMeters(radius);
@@ -221,7 +221,7 @@ document.getElementById("radius-slider").addEventListener("input", () => {
         document.getElementById("search-bar").value.trim() || getSelectedPreferences() || "restaurants", 
         `${currentLocation.lat()},${currentLocation.lng()}`, 
         map, 
-        getSelectedAllergies(), 
+        getSelectedDietaryRestrictions(), 
         getSelectedPreferences(), 
         radiusInMiles
       );
@@ -305,22 +305,22 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-function getSelectedAllergies() {
+function getSelectedDietaryRestrictions() {
   const allergies = [];
   if (document.getElementById("vegetarian").checked)
-    allergies.push("vegetarian restaurants");
+    allergies.push("vegetarian");
   if (document.getElementById("gluten-free").checked)
-    allergies.push("gluten-free restaurants");
+    allergies.push("gluten_free");
   if (document.getElementById("halal").checked)
-    allergies.push("halal restaurants");
-  if (document.getElementById("keto").checked)
-    allergies.push("keto restaurants");
+    allergies.push("halal");
   if (document.getElementById("kosher").checked)
-    allergies.push("kosher restaurants");
-  if (document.getElementById("pescatarian").checked)
-    allergies.push("pescatarian restaurants");
+    allergies.push("kosher");
   if (document.getElementById("vegan").checked)
-    allergies.push("vegan restaurants");
+    allergies.push("vegan");
+  // if (document.getElementById("keto").checked)
+  //   allergies.push("keto");
+  // if (document.getElementById("pescatarian").checked)
+  //   allergies.push("pescatarian");
   return allergies.join(", ");
 }
 
@@ -357,7 +357,7 @@ function searchYelp(term, location, map, allergies, preferences, radius) {
     term: term,
     location: location,
     preferences: preferences,
-    allergies: allergies,
+    categories: allergies,
     radius: milesToMeters(radius),    
   });
   const url = `https://api.yelp.com/v3/businesses/search?${params.toString()}`;
