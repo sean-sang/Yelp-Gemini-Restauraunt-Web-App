@@ -300,7 +300,9 @@ darkModeToggle.addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
+  const aiSearchField = document.getElementById("ai-search-bar");
+
+  if (event.key === "Enter" && document.activeElement !== aiSearchField) {
     handleSearch();
   }
 });
@@ -641,6 +643,14 @@ async function getAIRecommendation(prompt) {
   }
 }
 
+function clearCuisineCheckboxes() {
+  // clear cuisine check boxes
+  const checkboxes = document.getElementById("preferences-settings").querySelectorAll("input[type='checkbox']");
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = false;
+  });
+}
+
 // initialize ai search functionality
 function initAISearch() {
   const aiSearchButton = document.getElementById("ai-search-button");
@@ -684,16 +694,40 @@ function initAISearch() {
       searchBar.value = cuisineType;
       document.getElementById("search-button").click();
 
-      // clear all other check boxes
-      const checkboxes = document.getElementById("preferences-settings").querySelectorAll("input[type='checkbox']");
-      checkboxes.forEach((checkbox) => {
-        checkbox.checked = false;
-      });
+      clearCuisineCheckboxes();
 
       // also check the corresponding preference checkbox if it exists
       const preferenceCheckbox = document.getElementById(cuisineType.toLowerCase());
       if (preferenceCheckbox) {
         preferenceCheckbox.checked = true;
+      }
+    }
+  });
+
+  // copy and pasting block above for enter key because too lazy to abstract
+  document.getElementById("ai-search-bar").addEventListener("keydown", async (event) => {
+    if (event.key === "Enter") {
+      const prompt = aiSearchBar.value.trim();
+      if (!prompt) return;
+
+      // show loading state
+      aiSearchButton.disabled = true;
+      aiSearchButton.textContent = "Getting Recommendation...";
+      aiResponse.classList.remove("hidden");
+      aiResponseContent.textContent = "Thinking...";
+      useRecommendationButton.classList.add("hidden");
+
+      try {
+        const recommendation = await getAIRecommendation(prompt);
+        aiResponseContent.textContent = recommendation;
+        useRecommendationButton.classList.remove("hidden");
+      } catch (error) {
+        aiResponseContent.textContent =
+          "Sorry, there was an error getting your recommendation.";
+      } finally {
+        aiSearchButton.disabled = false;
+        aiSearchButton.innerHTML =
+          '<span class="ai-icon">🤖</span>Get AI Recommendation';
       }
     }
   });
