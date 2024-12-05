@@ -1,5 +1,5 @@
 const apiKey =
-  "vRx_0oJAbWa-1rm78yHd1ohJdozc7t-4FSTvFJx10VOGMa3uez56uocEkrdJp-L3hlZkSqvxHS3QjAzSAjbHr8Zc_41vEup74kwqfMdZCwVZOM_fQkmlrdmaOixQZ3Yx"; // Business Yelp API Key
+  "--TyCyp48m9XnttVkQaQgocUEf6kWP6LT6pltAhqHIZaD6_3zOpdSnVbYT10DdOvR6Wdwno51LhxHcmJ-j8XOKMBg5oWPIKmsQge5sVsF1OUWJEg_XM2fi8CnhhQZ3Yx"; // Business Yelp API Key
 const GEMINI_API_KEY = "AIzaSyDem0RVsOck3g19ay5ODZ7OEBJo29MaJhw";
 
 // update the map initialization function
@@ -308,20 +308,20 @@ document.addEventListener("keydown", (event) => {
 
 function getSelectedAllergies() {
   const allergies = [];
-  if (document.getElementById("peanut-free").checked)
-    allergies.push("peanut-free restaurants");
-  if (document.getElementById("tree-nut-free").checked)
-    allergies.push("tree nut-free restaurants");
-  if (document.getElementById("seafood-free").checked)
-    allergies.push("seafood-free restaurants");
-  if (document.getElementById("dairy-free").checked)
-    allergies.push("dairy-free restaurants");
+  if (document.getElementById("vegetarian").checked)
+    allergies.push("vegetarian restaurants");
   if (document.getElementById("gluten-free").checked)
     allergies.push("gluten-free restaurants");
-  if (document.getElementById("soy-free").checked)
-    allergies.push("soy-free restaurants");
-  if (document.getElementById("fish-free").checked)
-    allergies.push("fish-free restaurants");
+  if (document.getElementById("halal").checked)
+    allergies.push("halal restaurants");
+  if (document.getElementById("keto").checked)
+    allergies.push("keto restaurants");
+  if (document.getElementById("kosher").checked)
+    allergies.push("kosher restaurants");
+  if (document.getElementById("pescatarian").checked)
+    allergies.push("pescatarian restaurants");
+  if (document.getElementById("vegan").checked)
+    allergies.push("vegan restaurants");
   return allergies.join(", ");
 }
 
@@ -335,7 +335,6 @@ function getSelectedPreferences() {
     preferences.push("italian restaurants");
   if (document.getElementById("indian").checked)
     preferences.push("indian restaurants");
-
   if (document.getElementById("japanese").checked)
     preferences.push("japanese restaurants");
   if (document.getElementById("mediterranean").checked)
@@ -344,15 +343,10 @@ function getSelectedPreferences() {
     preferences.push("thai restaurants");
   if (document.getElementById("french").checked)
     preferences.push("french restaurants");
-  if (document.getElementById("japanese").checked)
-    preferences.push("japanese restaurants");
-
-  if (document.getElementById("vegetarian").checked)
-    preferences.push("vegatarian restaurants");
-  if (document.getElementById("nordic").checked)
-    preferences.push("nordic restaurants");
   if (document.getElementById("korean").checked)
     preferences.push("korean restaurants");
+  if (document.getElementById("nordic").checked)
+    preferences.push("nordic restaurants");
 
   return preferences.join(", ");
 }
