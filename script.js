@@ -679,13 +679,19 @@ function initAISearch() {
     // Extract just the cuisine type from the response
     const cuisineMatch = recommendation.match(/Cuisine Type:\s*(\S+)/);
     if (cuisineMatch && cuisineMatch[1]) {
-      const cuisineType = cuisineMatch[1].toLowerCase();
+      const cuisineType = cuisineMatch[1];
       const searchBar = document.getElementById("search-bar");
       searchBar.value = cuisineType;
       document.getElementById("search-button").click();
 
+      // clear all other check boxes
+      const checkboxes = document.getElementById("preferences-settings").querySelectorAll("input[type='checkbox']");
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+
       // also check the corresponding preference checkbox if it exists
-      const preferenceCheckbox = document.getElementById(cuisineType);
+      const preferenceCheckbox = document.getElementById(cuisineType.toLowerCase());
       if (preferenceCheckbox) {
         preferenceCheckbox.checked = true;
       }
